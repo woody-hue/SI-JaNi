@@ -1,38 +1,76 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
-<link rel="apple-touch-icon" href="icon-192.png">
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#4CAF50">
-
+    <!-- Meta Essentials -->
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SI-JaNi - Login</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="description" content="Sistem Informasi Jadwal Nikah KUA Belitang Hilir">
+    
+    <!-- PWA Configuration -->
+    <meta name="theme-color" content="#4a6fa5">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="SI-JaNi">
+    
+    <!-- Icons (Fixed Paths) -->
+    <link rel="icon" href="/SI-JaNi/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="192x192" href="/SI-JaNi/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/SI-JaNi/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="/SI-JaNi/icons/icon-192x192.png">
+    
+    <!-- Manifest (Single Declaration) -->
+    <link rel="manifest" href="/SI-JaNi/manifest.json">
+    
+    <!-- Title -->
+    <title>SI-JaNi - KUA Belitang Hilir</title>
+    
+    <!-- CSS -->
+    <link rel="stylesheet" href="/SI-JaNi/css/style.css">
 </head>
 <body>
     <div class="login-container">
-        <h1>SI-JaNi</h1>
-        <h2>Sistem Informasi Jadwal Nikah</h2>
-        <h3>KUA Belitang Hilir</h3>
-        <form id="loginForm">
-            <div class="input-group">
-                <label for="username">Username</label>
-                <input type="text" id="username" required>
-            </div>
-            <div class="input-group">
-                <label for="password">Password</label>
-                <input type="password" id="password" required>
-            </div>
-            <button type="submit">Login</button>
-        </form>
-        <div id="loginError" class="error-message"></div>
+        <header>
+            <h1>SI-JaNi</h1>
+            <h2>Sistem Informasi Jadwal Nikah</h2>
+            <h3>KUA Belitang Hilir</h3>
+        </header>
+        
+        <main>
+            <form id="loginForm">
+                <div class="input-group">
+                    <label for="username">Username</label>
+                    <input type="text" id="username" required aria-label="Masukkan username">
+                </div>
+                <div class="input-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" required aria-label="Masukkan password">
+                </div>
+                <button type="submit" class="btn-login">Login</button>
+            </form>
+            <div id="loginError" class="error-message" aria-live="assertive"></div>
+        </main>
     </div>
+    
     <footer>
         <p>Dikembangkan oleh Udi Wijaya</p>
     </footer>
-    <script src="js/script.js"></script>
+
+    <!-- JavaScript -->
+    <script src="/SI-JaNi/js/script.js"></script>
+    
+    <!-- Service Worker Registration -->
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/SI-JaNi/sw.js')
+                    .then(registration => {
+                        console.log('SW registered: ', registration.scope);
+                    })
+                    .catch(registrationError => {
+                        console.log('SW registration failed: ', registrationError);
+                    });
+            });
+        }
+    </script>
 </body>
 </html>
