@@ -2,11 +2,40 @@
   "name": "SI-JaNi",
   "short_name": "SI-JaNi",
   "description": "Sistem Informasi Jadwal Nikah KUA Belitang Hilir",
-  "start_url": "/SI-JaNi/",
+  "start_url": "/SI-JaNi/?source=pwa",
+  "scope": "/SI-JaNi/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#4a6fa5",
   "theme_color": "#4a6fa5",
+  "categories": ["business", "productivity"],
+  "lang": "id-ID",
+  "dir": "ltr",
   "icons": [
+    {
+      "src": "/SI-JaNi/icons/icon-72x72.png",
+      "sizes": "72x72",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/SI-JaNi/icons/icon-96x96.png",
+      "sizes": "96x96",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/SI-JaNi/icons/icon-128x128.png",
+      "sizes": "128x128",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/SI-JaNi/icons/icon-144x144.png",
+      "sizes": "144x144",
+      "type": "image/png",
+      "purpose": "any"
+    },
     {
       "src": "/SI-JaNi/icons/icon-192x192.png",
       "sizes": "192x192",
@@ -14,10 +43,80 @@
       "purpose": "any maskable"
     },
     {
+      "src": "/SI-JaNi/icons/icon-256x256.png",
+      "sizes": "256x256",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/SI-JaNi/icons/icon-384x384.png",
+      "sizes": "384x384",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
       "src": "/SI-JaNi/icons/icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "screenshots": [
+    {
+      "src": "/SI-JaNi/screenshots/screenshot1.webp",
+      "sizes": "1080x1920",
+      "type": "image/webp",
+      "form_factor": "narrow",
+      "label": "Halaman Login SI-JaNi"
+    },
+    {
+      "src": "/SI-JaNi/screenshots/screenshot2.webp",
+      "sizes": "1920x1080",
+      "type": "image/webp",
+      "form_factor": "wide",
+      "label": "Dashboard Admin"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Buat Jadwal Baru",
+      "short_name": "New",
+      "description": "Buat jadwal nikah baru",
+      "url": "/SI-JaNi/new?source=pwa",
+      "icons": [
+        {
+          "src": "/SI-JaNi/icons/shortcut-new.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Cari Jadwal",
+      "short_name": "Search",
+      "description": "Cari jadwal nikah",
+      "url": "/SI-JaNi/search?source=pwa",
+      "icons": [
+        {
+          "src": "/SI-JaNi/icons/shortcut-search.png",
+          "sizes": "96x96"
+        }
+      ]
+    }
+  ],
+  "file_handlers": [
+    {
+      "action": "/SI-JaNi/import",
+      "accept": {
+        "application/json": [".json"],
+        "text/csv": [".csv"]
+      },
+      "icons": [
+        {
+          "src": "/SI-JaNi/icons/icon-import.png",
+          "sizes": "96x96"
+        }
+      ],
+      "launch_type": "single-client"
     }
   ]
 }
