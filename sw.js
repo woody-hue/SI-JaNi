@@ -1,9 +1,8 @@
 const APP_NAME = 'SI-JaNi';
-const CACHE_NAME = `${APP_NAME}-v2.0.1`; // Versi diupdate untuk cache refresh
-const OFFLINE_URL = '/SI-JaNi/offline.html'; // Halaman fallback
-
-// Daftar resource yang akan di-cache
-const urlsToCache = [
+const CACHE_VERSION = 'v2.1.0';
+const CACHE_NAME = `${APP_NAME}-${CACHE_VERSION}`;
+const OFFLINE_URL = '/SI-JaNi/offline.html';
+const PRECACHE_URLS = [
   '/SI-JaNi/',
   '/SI-JaNi/index.html',
   '/SI-JaNi/css/style.css',
@@ -12,84 +11,107 @@ const urlsToCache = [
   '/SI-JaNi/manifest.json',
   '/SI-JaNi/icons/icon-192x192.png',
   '/SI-JaNi/icons/icon-512x512.png',
+  '/SI-JaNi/images/bg-mobile.webp',
+  '/SI-JaNi/images/bg-desktop.webp',
   OFFLINE_URL
 ];
 
-// Install Service Worker
+// Installation - Precaches app shell and critical assets
 self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[Service Worker] Caching app shell');
-        return cache.addAll(urlsToCache)
-          .catch(error => {
-            console.error('Failed to cache:', error);
-          });
+        console.log('[SW] Installing new version:', CACHE_VERSION);
+        return cache.addAll(PRECACHE_URLS)
+          .then(() => console.log('[SW] Precaching complete'))
+          .catch(err => console.error('[SW] Precaching failed:', err));
       })
-      .then(() => self.skipWaiting()) // Memaksa aktivasi SW baru
+      .then(() => self.skipWaiting())
   );
 });
 
-// Fetch Handler dengan strategi Cache First dengan fallback network
-self.addEventListener('fetch', event => {
-  // Skip permintaan non-GET dan cross-origin
-  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
-    return event.respondWith(fetch(event.request));
-  }
-
-  event.respondWith(
-    caches.match(event.request)
-      .then(cachedResponse => {
-        // 1. Return cached response jika ada
-        if (cachedResponse) {
-          return cachedResponse;
-        }
-
-        // 2. Lakukan fetch untuk permintaan baru
-        return fetch(event.request)
-          .then(response => {
-            // Validasi response
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            // Clone response untuk disimpan di cache
-            const responseToCache = response.clone();
-            caches.open(CACHE_NAME)
-              .then(cache => {
-                cache.put(event.request, responseToCache);
-              });
-
-            return response;
-          })
-          .catch(async () => {
-            // 3. Fallback untuk halaman offline
-            if (event.request.headers.get('accept').includes('text/html')) {
-              return caches.match(OFFLINE_URL);
-            }
-            
-            // Fallback untuk gambar
-            if (event.request.headers.get('accept').includes('image')) {
-              return caches.match('/SI-JaNi/icons/icon-512x512.png');
-            }
-          });
-      })
-  );
-});
-
-// Cleanup cache lama saat aktivasi
+// Activation - Clean up old caches
 self.addEventListener('activate', event => {
   event.waitUntil(
     caches.keys().then(cacheNames => {
       return Promise.all(
         cacheNames.map(cacheName => {
           if (cacheName !== CACHE_NAME && cacheName.startsWith(APP_NAME)) {
-            console.log('[Service Worker] Deleting old cache:', cacheName);
+            console.log('[SW] Removing old cache:', cacheName);
             return caches.delete(cacheName);
           }
         })
       );
     })
-    .then(() => self.clients.claim()) // Mengontrol klien segera
+    .then(() => {
+      console.log('[SW] Claiming clients');
+      return self.clients.claim();
+    })
   );
+});
+
+// Fetch - Cache with Network Fallback strategy
+self.addEventListener('fetch', event => {
+  // Skip non-GET requests and cross-origin requests
+  if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) {
+    return;
+  }
+
+  // Handle navigation requests specially
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => caches.match(OFFLINE_URL))
+    );
+    return;
+  }
+
+  event.respondWith(
+    caches.match(event.request)
+      .then(cachedResponse => {
+        // Return cached response if available
+        if (cachedResponse) {
+          console.log('[SW] Serving from cache:', event.request.url);
+          return cachedResponse;
+        }
+
+        // Otherwise fetch from network
+        return fetch(event.request)
+          .then(response => {
+            // Check if we received a valid response
+            if (!response || response.status !== 200 || response.type !== 'basic') {
+              return response;
+            }
+
+            // Clone the response for caching
+            const responseToCache = response.clone();
+            caches.open(CACHE_NAME)
+              .then(cache => {
+                console.log('[SW] Caching new response:', event.request.url);
+                cache.put(event.request, responseToCache);
+              });
+
+            return response;
+          })
+          .catch(error => {
+            console.error('[SW] Fetch failed:', error);
+            // Special handling for images
+            if (event.request.headers.get('accept').includes('image')) {
+              return caches.match('/SI-JaNi/icons/icon-512x512.png');
+            }
+            // Return offline page for document requests
+            if (event.request.headers.get('accept').includes('text/html')) {
+              return caches.match(OFFLINE_URL);
+            }
+          });
+      })
+  );
+});
+
+// Background sync (optional)
+self.addEventListener('sync', event => {
+  if (event.tag === 'sync-data') {
+    console.log('[SW] Background sync triggered');
+    // Implement your background sync logic here
+  }
 });
