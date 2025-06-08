@@ -12,13 +12,17 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="SI-JaNi">
     
-    <!-- Icons (Fixed Paths) -->
+    <!-- Preload Background Images -->
+    <link rel="preload" href="/SI-JaNi/images/bg-mobile.webp" as="image" media="(max-width: 767px)">
+    <link rel="preload" href="/SI-JaNi/images/bg-desktop.webp" as="image" media="(min-width: 768px)">
+    
+    <!-- Icons -->
     <link rel="icon" href="/SI-JaNi/favicon.ico" type="image/x-icon">
     <link rel="icon" type="image/png" sizes="192x192" href="/SI-JaNi/icons/icon-192x192.png">
     <link rel="icon" type="image/png" sizes="512x512" href="/SI-JaNi/icons/icon-512x512.png">
     <link rel="apple-touch-icon" href="/SI-JaNi/icons/icon-192x192.png">
     
-    <!-- Manifest (Single Declaration) -->
+    <!-- Manifest -->
     <link rel="manifest" href="/SI-JaNi/manifest.json">
     
     <!-- Title -->
@@ -26,10 +30,52 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="/SI-JaNi/css/style.css">
+    
+    <style>
+        /* Inline Critical CSS untuk background */
+        body {
+            background-color: #4a6fa5;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+        }
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: url('/SI-JaNi/images/bg-mobile.webp');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            z-index: -1;
+        }
+        @media (min-width: 768px) {
+            body::before {
+                background-image: url('/SI-JaNi/images/bg-desktop.webp');
+            }
+        }
+        body::after {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(74, 111, 165, 0.7);
+            z-index: -1;
+        }
+    </style>
 </head>
 <body>
     <div class="login-container">
         <header>
+            <div class="logo">
+                <img src="/SI-JaNi/icons/icon-192x192.png" alt="Logo SI-JaNi" width="80">
+            </div>
             <h1>SI-JaNi</h1>
             <h2>Sistem Informasi Jadwal Nikah</h2>
             <h3>KUA Belitang Hilir</h3>
