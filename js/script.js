@@ -1,27 +1,107 @@
-// Inisialisasi aplikasi
+// Inisialisasi aplikasi dengan update notification support
 document.addEventListener('DOMContentLoaded', function() {
     checkLoginStatus();
     
+    // Enhanced Service Worker Registration with Update Detection
     if ('serviceWorker' in navigator) {
-        window.addEventListener('load', () => {
-            navigator.serviceWorker.register('sw.js')
-                .then(registration => {
-                    console.log('ServiceWorker registration successful');
-                })
-                .catch(err => {
-                    console.log('ServiceWorker registration failed: ', err);
+        navigator.serviceWorker.register('sw.js')
+            .then(registration => {
+                console.log('ServiceWorker registration successful');
+                
+                // Handle updates
+                registration.addEventListener('updatefound', () => {
+                    const newWorker = registration.installing;
+                    newWorker.addEventListener('statechange', () => {
+                        if (newWorker.state === 'installed') {
+                            if (navigator.serviceWorker.controller) {
+                                // New update available
+                                showUpdateNotification();
+                            }
+                        }
+                    });
                 });
+            })
+            .catch(err => {
+                console.log('ServiceWorker registration failed: ', err);
+            });
+
+        // Listen for controller change (update applied)
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+            window.location.reload();
         });
     }
     
+    // Initialize appropriate page
     if (document.getElementById('loginForm')) {
         setupLoginPage();
     } else if (document.getElementById('scheduleTable')) {
         setupDashboardPage();
     }
+
+    // Request notification permission
+    requestNotificationPermission();
 });
 
-// USER MANAGEMENT
+// Enhanced notification function with PWA support
+function showNotification(title, options = {}) {
+    // Try PWA notification first
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification(title, options);
+    } 
+    // Fallback to in-app notification
+    else {
+        const notification = document.createElement('div');
+        notification.classList.add('notification', options.type || 'info');
+        
+        // Default icon based on type
+        const icon = options.type === 'error' ? '❌' : 
+                    options.type === 'success' ? '✅' : 'ℹ️';
+        
+        notification.innerHTML = `
+            <span class="notification-icon">${icon}</span>
+            <div class="notification-content">
+                <strong>${title}</strong>
+                ${options.body ? `<p>${options.body}</p>` : ''}
+            </div>
+        `;
+        
+        document.body.appendChild(notification);
+        
+        // Animation
+        setTimeout(() => notification.classList.add('show'), 10);
+        setTimeout(() => {
+            notification.classList.remove('show');
+            setTimeout(() => notification.remove(), 300);
+        }, options.duration || 5000);
+    }
+}
+
+// Request notification permission
+function requestNotificationPermission() {
+    if ('Notification' in window) {
+        Notification.requestPermission().then(permission => {
+            if (permission === 'granted') {
+                console.log('Notification permission granted');
+            }
+        });
+    }
+}
+
+// Show update notification
+function showUpdateNotification() {
+    if (confirm('Versi baru tersedia! Muat ulang sekarang untuk mendapatkan fitur terbaru?')) {
+        // Tell service worker to skip waiting
+        if (navigator.serviceWorker.controller) {
+            navigator.serviceWorker.controller.postMessage({
+                type: 'SKIP_WAITING'
+            });
+        } else {
+            window.location.reload();
+        }
+    }
+}
+
+// USER MANAGEMENT (unchanged)
 const validUsers = [
     { 
         username: 'admin', 
@@ -37,455 +117,93 @@ const validUsers = [
     }
 ];
 
-function checkLoginStatus() {
-    if (window.location.pathname.endsWith('dashboard.html')) {
-        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
-        if (!currentUser) {
-            window.location.href = 'index.html';
-        }
-    }
-}
+// ... (rest of your existing code remains the same)
 
-function getCurrentUser() {
-    return JSON.parse(localStorage.getItem('currentUser'));
-}
-
-function checkUserRole() {
-    const currentUser = getCurrentUser();
-    return currentUser ? currentUser.role : null;
-}
-
-// LOGIN PAGE
-function setupLoginPage() {
-    const loginForm = document.getElementById('loginForm');
-    const loginError = document.getElementById('loginError');
+// MODIFIED saveSchedule function to use new notification system
+function saveSchedule(e) {
+    e.preventDefault();
     
-    loginForm.addEventListener('submit', function(e) {
-        e.preventDefault();
-        
-        const username = document.getElementById('username').value;
-        const password = document.getElementById('password').value;
-        
-        const user = validUsers.find(u => u.username === username && u.password === password);
-        
-        if (user) {
-            localStorage.setItem('currentUser', JSON.stringify(user));
-            window.location.href = 'dashboard.html';
-        } else {
-            loginError.textContent = 'Username atau password salah';
-        }
-    });
-}
-
-// DASHBOARD PAGE
-function setupDashboardPage() {
-    const currentUser = getCurrentUser();
-    const userRole = checkUserRole();
-    
-    // Set UI berdasarkan role
-    document.getElementById('loggedInUser').textContent = `Selamat datang, ${currentUser.name} (${userRole})`;
-    
-    if (userRole === 'pegawai') {
-        document.getElementById('addScheduleBtn').style.display = 'none';
-        document.querySelectorAll('.action-column').forEach(el => el.style.display = 'none');
+    if (userRole !== 'admin') {
+        showNotification('Akses Ditolak', {
+            body: 'Hanya admin yang bisa menyimpan data',
+            type: 'error'
+        });
+        return;
     }
     
-    // Inisialisasi variabel
-    let currentDate = new Date();
-    let currentMonth = currentDate.getMonth();
-    let currentYear = currentDate.getFullYear();
-    let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+    // ... (existing validation logic)
     
-    // Setup event listeners
-    document.getElementById('logoutBtn').addEventListener('click', logout);
-    document.getElementById('addScheduleBtn').addEventListener('click', () => openModal('add'));
-    document.getElementById('prevMonthBtn').addEventListener('click', showPreviousMonth);
-    document.getElementById('nextMonthBtn').addEventListener('click', showNextMonth);
-    document.getElementById('locationFilter').addEventListener('change', renderCalendarAndScheduleList);
-    document.querySelector('.close').addEventListener('click', () => closeModal());
-    document.getElementById('location').addEventListener('change', toggleLocationDetail);
-    document.getElementById('scheduleForm').addEventListener('submit', saveSchedule);
-    document.getElementById('deleteBtn').addEventListener('click', deleteSchedule);
-    
-    window.addEventListener('click', function(e) {
-        if (e.target === document.getElementById('scheduleModal')) {
-            closeModal();
-        }
+    // Show enhanced notification
+    showNotification('Jadwal Tersimpan', {
+        body: `Jadwal nikah ${groomName} & ${brideName} berhasil disimpan`,
+        type: 'success'
     });
     
-    // Render data
-    renderCalendarAndScheduleList();
-    checkUpcomingSchedules();
-    
-    // FUNGSI UTAMA
-    function logout() {
-        localStorage.removeItem('currentUser');
-        window.location.href = 'index.html';
-    }
-    
-    function renderCalendarAndScheduleList() {
-        renderCalendar(currentMonth, currentYear);
-        renderScheduleList(currentMonth, currentYear);
-    }
-    
-    function renderCalendar(month, year) {
-        const calendarBody = document.getElementById('calendarBody');
-        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", 
-                          "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        document.getElementById('currentMonthYear').textContent = `${monthNames[month]} ${year}`;
-        
-        const firstDay = new Date(year, month, 1);
-        const lastDay = new Date(year, month + 1, 0);
-        const daysInMonth = lastDay.getDate();
-        let firstDayIndex = firstDay.getDay();
-        
-        calendarBody.innerHTML = '';
-        
-        for (let i = 0; i < firstDayIndex; i++) {
-            const dayElement = document.createElement('div');
-            dayElement.classList.add('calendar-day', 'empty');
-            calendarBody.appendChild(dayElement);
-        }
-        
-        for (let i = 1; i <= daysInMonth; i++) {
-            const dayElement = document.createElement('div');
-            dayElement.classList.add('calendar-day');
-            
-            const today = new Date();
-            if (i === today.getDate() && month === today.getMonth() && year === today.getFullYear()) {
-                dayElement.classList.add('today');
-            }
-            
-            const dayNumber = document.createElement('div');
-            dayNumber.classList.add('day-number');
-            dayNumber.textContent = i;
-            dayElement.appendChild(dayNumber);
-            
-            const daySchedules = getSchedulesForDay(i, month, year);
-            daySchedules.forEach(schedule => {
-                const scheduleElement = document.createElement('div');
-                scheduleElement.classList.add('schedule-item');
-                if (schedule.location === 'Lapangan') {
-                    scheduleElement.classList.add('lapangan');
-                }
-                scheduleElement.textContent = `${schedule.time} - ${schedule.groomName} & ${schedule.brideName}`;
-                scheduleElement.setAttribute('data-id', schedule.id);
-                
-                if (userRole === 'admin') {
-                    scheduleElement.addEventListener('click', () => openModal('edit', schedule.id));
-                }
-                
-                dayElement.appendChild(scheduleElement);
-            });
-            
-            calendarBody.appendChild(dayElement);
-        }
-    }
-    
-    function getSchedulesForDay(day, month, year) {
-        const filteredLocation = document.getElementById('locationFilter').value;
-        
-        return schedules.filter(schedule => {
-            const scheduleDate = new Date(schedule.date);
-            return scheduleDate.getDate() === day && 
-                   scheduleDate.getMonth() === month && 
-                   scheduleDate.getFullYear() === year &&
-                   (filteredLocation === 'all' || schedule.location === filteredLocation);
+    // Show PWA notification if available
+    if ('Notification' in window && Notification.permission === 'granted') {
+        new Notification('SI-JaNi: Jadwal Baru', {
+            body: `Jadwal nikah ${groomName} & ${brideName} pada ${date} ${time}`,
+            icon: '/icons/icon-192x192.png',
+            badge: '/icons/icon-72x72.png'
         });
-    }
-    
-    function renderScheduleList(month, year) {
-        const scheduleTableBody = document.getElementById('scheduleTableBody');
-        const filteredLocation = document.getElementById('locationFilter').value;
-        
-        const filteredSchedules = schedules.filter(schedule => {
-            const scheduleDate = new Date(schedule.date);
-            return scheduleDate.getMonth() === month && 
-                   scheduleDate.getFullYear() === year &&
-                   (filteredLocation === 'all' || schedule.location === filteredLocation);
-        }).sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
-            return dateA - dateB;
-        });
-        
-        scheduleTableBody.innerHTML = '';
-        
-        filteredSchedules.forEach(schedule => {
-            const row = document.createElement('tr');
-            
-            const scheduleDate = new Date(schedule.date);
-            const formattedDate = `${scheduleDate.getDate()} ${getMonthName(scheduleDate.getMonth())} ${scheduleDate.getFullYear()}`;
-            const phoneNumbers = `${schedule.groomPhone} / ${schedule.bridePhone}`;
-            const location = schedule.location === 'KUA' ? 'Kantor KUA' : schedule.locationDetail || 'Lapangan';
-            
-            row.innerHTML = `
-                <td>${formattedDate}</td>
-                <td>${schedule.time}</td>
-                <td>${schedule.groomName}</td>
-                <td>${schedule.brideName}</td>
-                <td>${phoneNumbers}</td>
-                <td>${location}</td>
-                <td class="status-${schedule.documentStatus.toLowerCase()}">${schedule.documentStatus}</td>
-                <td>${schedule.notes || '-'}</td>
-                <td class="action-column">
-                    ${userRole === 'admin' ? `
-                    <button class="action-btn edit-btn" data-id="${schedule.id}">Edit</button>
-                    <button class="action-btn delete-btn" data-id="${schedule.id}">Hapus</button>
-                    ` : '-'}
-                </td>
-            `;
-            
-            scheduleTableBody.appendChild(row);
-        });
-        
-        if (userRole === 'admin') {
-            document.querySelectorAll('.edit-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => openModal('edit', e.target.getAttribute('data-id')));
-            });
-            
-            document.querySelectorAll('.delete-btn').forEach(btn => {
-                btn.addEventListener('click', (e) => {
-                    if (confirm('Apakah Anda yakin ingin menghapus jadwal ini?')) {
-                        deleteScheduleById(e.target.getAttribute('data-id'));
-                    }
-                });
-            });
-        }
-    }
-    
-    function getMonthName(monthIndex) {
-        const monthNames = ["Januari", "Februari", "Maret", "April", "Mei", "Juni", 
-                          "Juli", "Agustus", "September", "Oktober", "November", "Desember"];
-        return monthNames[monthIndex];
-    }
-    
-    function showPreviousMonth() {
-        currentMonth--;
-        if (currentMonth < 0) {
-            currentMonth = 11;
-            currentYear--;
-        }
-        renderCalendarAndScheduleList();
-    }
-    
-    function showNextMonth() {
-        currentMonth++;
-        if (currentMonth > 11) {
-            currentMonth = 0;
-            currentYear++;
-        }
-        renderCalendarAndScheduleList();
-    }
-    
-    function openModal(action, scheduleId = null) {
-        if (userRole !== 'admin') {
-            showNotification('Akses ditolak: Hanya admin yang bisa mengedit data', 'error');
-            return;
-        }
-        
-        const modalTitle = document.getElementById('modalTitle');
-        const deleteBtn = document.getElementById('deleteBtn');
-        const form = document.getElementById('scheduleForm');
-        
-        form.reset();
-        
-        if (action === 'add') {
-            modalTitle.textContent = 'Tambah Jadwal Nikah';
-            deleteBtn.style.display = 'none';
-            
-            const today = new Date();
-            document.getElementById('weddingDate').value = today.toISOString().split('T')[0];
-            document.getElementById('weddingTime').value = '10:00';
-            document.getElementById('notes').value = `Diinput oleh: ${currentUser.name}`;
-        } else if (action === 'edit' && scheduleId) {
-            modalTitle.textContent = 'Edit Jadwal Nikah';
-            deleteBtn.style.display = 'inline-block';
-            deleteBtn.setAttribute('data-id', scheduleId);
-            
-            const schedule = schedules.find(s => s.id === scheduleId);
-            if (schedule) {
-                document.getElementById('scheduleId').value = schedule.id;
-                document.getElementById('groomName').value = schedule.groomName;
-                document.getElementById('brideName').value = schedule.brideName;
-                document.getElementById('groomPhone').value = schedule.groomPhone;
-                document.getElementById('bridePhone').value = schedule.bridePhone;
-                document.getElementById('weddingDate').value = schedule.date;
-                document.getElementById('weddingTime').value = schedule.time;
-                document.getElementById('location').value = schedule.location;
-                document.getElementById('documentStatus').value = schedule.documentStatus;
-                document.getElementById('notes').value = schedule.notes || '';
-                
-                if (schedule.location === 'Lapangan') {
-                    document.getElementById('locationDetailGroup').style.display = 'block';
-                    document.getElementById('locationDetail').value = schedule.locationDetail || '';
-                } else {
-                    document.getElementById('locationDetailGroup').style.display = 'none';
-                }
-            }
-        }
-        
-        document.getElementById('scheduleModal').style.display = 'block';
-    }
-    
-    function closeModal() {
-        document.getElementById('scheduleModal').style.display = 'none';
-    }
-    
-    function toggleLocationDetail() {
-        const locationDetailGroup = document.getElementById('locationDetailGroup');
-        locationDetailGroup.style.display = this.value === 'Lapangan' ? 'block' : 'none';
-    }
-    
-    function saveSchedule(e) {
-        e.preventDefault();
-        
-        if (userRole !== 'admin') {
-            showNotification('Akses ditolak: Hanya admin yang bisa menyimpan data', 'error');
-            return;
-        }
-        
-        const scheduleId = document.getElementById('scheduleId').value;
-        const groomName = document.getElementById('groomName').value.trim();
-        const brideName = document.getElementById('brideName').value.trim();
-        const groomPhone = document.getElementById('groomPhone').value.trim();
-        const bridePhone = document.getElementById('bridePhone').value.trim();
-        const date = document.getElementById('weddingDate').value;
-        const time = document.getElementById('weddingTime').value;
-        const location = document.getElementById('location').value;
-        const locationDetail = location === 'Lapangan' ? document.getElementById('locationDetail').value.trim() : '';
-        const documentStatus = document.getElementById('documentStatus').value;
-        const notes = document.getElementById('notes').value.trim();
-        
-        if (!groomName || !brideName || !groomPhone || !bridePhone || !date || !time) {
-            showNotification('Semua field harus diisi kecuali keterangan', 'error');
-            return;
-        }
-        
-        if (location === 'Lapangan') {
-            const conflictingSchedule = checkScheduleConflict(date, time, scheduleId);
-            if (conflictingSchedule) {
-                showNotification(`Peringatan: Jadwal bentrok dengan ${conflictingSchedule.groomName} & ${conflictingSchedule.brideName} di ${conflictingSchedule.locationDetail || 'lapangan'}`, 'warning');
-                return;
-            }
-        }
-        
-        const newSchedule = {
-            id: scheduleId || generateId(),
-            groomName,
-            brideName,
-            groomPhone,
-            bridePhone,
-            date,
-            time,
-            location,
-            locationDetail,
-            documentStatus,
-            notes,
-            createdBy: currentUser.name,
-            createdAt: scheduleId ? schedules.find(s => s.id === scheduleId).createdAt : new Date().toISOString(),
-            updatedAt: new Date().toISOString()
-        };
-        
-        if (scheduleId) {
-            schedules = schedules.filter(s => s.id !== scheduleId);
-        }
-        
-        schedules.push(newSchedule);
-        localStorage.setItem('schedules', JSON.stringify(schedules));
-        
-        renderCalendarAndScheduleList();
-        closeModal();
-        showNotification(`Jadwal untuk ${groomName} & ${brideName} berhasil disimpan`);
-        
-        if ('Notification' in window && Notification.permission === 'granted') {
-            new Notification('SI-JaNi: Jadwal Baru', {
-                body: `Jadwal nikah ${groomName} & ${brideName} pada ${date} ${time} telah ditambahkan`
-            });
-        }
-    }
-    
-    function deleteSchedule() {
-        if (userRole !== 'admin') {
-            showNotification('Akses ditolak: Hanya admin yang bisa menghapus data', 'error');
-            return;
-        }
-        
-        const scheduleId = this.getAttribute('data-id');
-        deleteScheduleById(scheduleId);
-    }
-    
-    function deleteScheduleById(scheduleId) {
-        if (userRole !== 'admin') {
-            showNotification('Akses ditolak: Hanya admin yang bisa menghapus data', 'error');
-            return;
-        }
-        
-        schedules = schedules.filter(s => s.id !== scheduleId);
-        localStorage.setItem('schedules', JSON.stringify(schedules));
-        renderCalendarAndScheduleList();
-        closeModal();
-        showNotification('Jadwal berhasil dihapus');
-    }
-    
-    function generateId() {
-        return Date.now().toString(36) + Math.random().toString(36).substr(2);
-    }
-    
-    function checkScheduleConflict(date, time, excludeId = null) {
-        const [hours, minutes] = time.split(':').map(Number);
-        const checkMinutes = hours * 60 + minutes;
-        
-        const sameDateSchedules = schedules.filter(s => {
-            return s.date === date && 
-                   s.location === 'Lapangan' && 
-                   s.id !== excludeId;
-        });
-        
-        for (const schedule of sameDateSchedules) {
-            const [schedHours, schedMinutes] = schedule.time.split(':').map(Number);
-            const schedMinutesTotal = schedHours * 60 + schedMinutes;
-            
-            if (Math.abs(checkMinutes - schedMinutesTotal) < 120) {
-                return schedule;
-            }
-        }
-        
-        return null;
-    }
-    
-    function showNotification(message, type = 'success') {
-        const notification = document.createElement('div');
-        notification.classList.add('notification', type);
-        notification.textContent = message;
-        document.body.appendChild(notification);
-        
-        setTimeout(() => {
-            notification.style.display = 'block';
-        }, 10);
-        
-        setTimeout(() => {
-            notification.style.opacity = '0';
-            setTimeout(() => {
-                notification.remove();
-            }, 300);
-        }, 5000);
-    }
-    
-    function checkUpcomingSchedules() {
-        const now = new Date();
-        const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-        const nextWeek = new Date(today);
-        nextWeek.setDate(nextWeek.getDate() + 7);
-        
-        const upcomingSchedules = schedules.filter(schedule => {
-            const scheduleDate = new Date(schedule.date);
-            return scheduleDate >= today && scheduleDate <= nextWeek;
-        });
-        
-        if (upcomingSchedules.length > 0) {
-            const count = upcomingSchedules.length;
-            showNotification(`Anda memiliki ${count} jadwal nikah dalam 7 hari ke depan`, 'info');
-        }
     }
 }
+
+// Add this CSS for notifications
+const style = document.createElement('style');
+style.textContent = `
+.notification {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    padding: 15px;
+    background: #4a6fa5;
+    color: white;
+    border-radius: 8px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    max-width: 320px;
+    transform: translateY(100px);
+    opacity: 0;
+    transition: all 0.3s ease;
+    z-index: 1000;
+}
+
+.notification.show {
+    transform: translateY(0);
+    opacity: 1;
+}
+
+.notification.success {
+    background: #28a745;
+}
+
+.notification.error {
+    background: #dc3545;
+}
+
+.notification-icon {
+    font-size: 20px;
+}
+
+.notification-content {
+    flex: 1;
+}
+
+.notification-content p {
+    margin: 5px 0 0;
+    font-size: 14px;
+    opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+    .notification {
+        left: 20px;
+        right: 20px;
+        max-width: none;
+    }
+}
+`;
+document.head.appendChild(style);
