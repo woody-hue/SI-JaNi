@@ -8,26 +8,24 @@ html {
     margin: 0;
     padding: 0;
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    -webkit-tap-highlight-color: transparent; 
+    -webkit-tap-highlight-color: transparent;
 }
 
 body {
     color: #333;
     line-height: 1.6;
     min-height: 100vh;
-    position: relative;
     background-color: #4a6fa5;
     overflow-x: hidden;
+    position: relative;
 }
 
 body::before,
 body::after {
     content: "";
     position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
     pointer-events: none;
 }
 
@@ -50,82 +48,73 @@ body::after {
     }
 }
 
-.login-container {
-    max-width: 400px;
-    margin: 50px auto;
-    padding: 30px;
+header {
+    background: rgba(74, 111, 165, 0.9);
+    color: #fff;
+    padding: 1em 1.5em;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    backdrop-filter: blur(5px);
+}
+
+header h1 {
+    font-size: 1.8rem;
+}
+
+header h2 {
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+.user-info {
+    margin-top: 0.5em;
+}
+
+main {
+    max-width: 1200px;
+    margin: 1em auto;
+    padding: 1em;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 10px;
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-    text-align: center;
-    position: relative;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px); 
+    box-shadow: 0 5px 15px rgba(0,0,0,0.1);
 }
 
-.login-container h1 {
-    color: #4a6fa5;
-    margin-bottom: 10px;
-    font-size: 2rem;
+.controls {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1em;
+    align-items: center;
+    justify-content: space-between;
 }
 
-.login-container h2,
-.login-container h3 {
-    color: #666;
-    margin-bottom: 10px;
-    font-weight: 500;
+.month-navigation {
+    display: flex;
+    align-items: center;
+    gap: 0.5em;
 }
 
-.logo img {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
-    object-fit: cover;
-    border: 3px solid #4a6fa5;
-}
-
-.input-group {
-    margin-bottom: 20px;
-    text-align: left;
-}
-
-.input-group label {
-    display: block;
-    margin-bottom: 8px;
-    font-weight: 600;
-    color: #555;
-}
-
-.input-group input {
-    width: 100%;
-    padding: 12px;
-    border: 1px solid #ddd;
-    border-radius: 6px;
-    font-size: 16px;
-    transition: 0.3s;
-}
-
-.input-group input:focus {
-    border-color: #4a6fa5;
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
+.filter {
+    min-width: 200px;
 }
 
 button {
-    background-color: #4a6fa5;
-    color: white;
+    background: #4a6fa5;
+    color: #fff;
     border: none;
-    padding: 12px;
+    padding: 0.6em 1em;
     border-radius: 6px;
     cursor: pointer;
-    font-size: 16px;
-    width: 100%;
     font-weight: 600;
-    transition: 0.3s ease;
+    transition: background 0.3s ease, transform 0.2s ease;
 }
 
 button:hover {
-    background-color: #3a5a80;
+    background: #3a5a80;
     transform: translateY(-2px);
 }
 
@@ -133,47 +122,101 @@ button:active {
     transform: translateY(0);
 }
 
-.error-message {
-    color: #d9534f;
-    margin-top: 15px;
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 1em;
+}
+
+th, td {
+    border: 1px solid #ddd;
+    padding: 0.5em;
+    text-align: center;
+}
+
+th {
+    background: #4a6fa5;
+    color: #fff;
+}
+
+#calendar {
+    margin-top: 1em;
+}
+
+.calendar-header {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    background: #4a6fa5;
+    color: #fff;
+}
+
+.day-header {
+    padding: 0.5em;
+    text-align: center;
+}
+
+.calendar-body {
+    display: grid;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 1px;
+    background: #ddd;
+}
+
+.calendar-body div {
+    background: #fff;
+    min-height: 80px;
+    padding: 0.5em;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    z-index: 999;
+    left: 0; top: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.5);
+    overflow-y: auto;
+}
+
+.modal-content {
+    background: #fff;
+    margin: 5% auto;
+    padding: 1em;
+    border-radius: 8px;
+    width: 90%;
+    max-width: 500px;
+}
+
+.form-group {
+    margin-bottom: 0.75em;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 0.3em;
     font-weight: 600;
-    padding: 10px;
-    background-color: rgba(217, 83, 79, 0.1);
+    color: #555;
+}
+
+.form-group input, 
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 0.5em;
+    border: 1px solid #ccc;
     border-radius: 4px;
 }
 
 footer {
     text-align: center;
-    margin-top: 30px;
-    color: rgba(255, 255, 255, 0.8);
+    padding: 1em;
+    color: rgba(255,255,255,0.8);
     font-size: 0.9rem;
-}
-
-header {
-    background-color: rgba(74, 111, 165, 0.9);
-    color: white;
-    padding: 15px 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    backdrop-filter: blur(5px);
-    -webkit-backdrop-filter: blur(5px);
-    position: sticky;
-    top: 0;
-    z-index: 100;
+    margin-top: 2em;
 }
 
 @media (max-width: 768px) {
-    html {
-        font-size: 15px;
-    }
-
-    .login-container {
-        margin: 20px auto;
-        padding: 20px;
-        width: 90%;
-    }
+    html { font-size: 15px; }
 
     .controls {
         flex-direction: column;
@@ -194,32 +237,7 @@ header {
         width: 95%;
     }
 
-    .action-btn {
-        display: block;
+    button {
         width: 100%;
-        margin-bottom: 5px;
-    }
-}
-
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-}
-
-.login-container {
-    animation: fadeIn 0.5s ease-out;
-}
-
-@media print {
-    body::before,
-    body::after {
-        display: none;
-    }
-
-    .login-container {
-        background: white;
-        box-shadow: none;
-        margin: 0;
-        padding: 0;
     }
 }
