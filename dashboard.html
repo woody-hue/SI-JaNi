@@ -1,261 +1,270 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SI-JaNi - Dashboard</title>
-    <link rel="manifest" href="manifest.json">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        header, footer {
-            background: #4CAF50;
-            color: white;
-            padding: 1em;
-            text-align: center;
-        }
-
-        .user-info {
-            margin-top: 0.5em;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 1em auto;
-            padding: 1em;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1em;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1em;
-        }
-
-        .month-navigation {
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-        }
-
-        .filter {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1em;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 0.5em;
-            text-align: center;
-        }
-
-        th {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 1em;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .form-group {
-            margin-bottom: 0.75em;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.3em;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.5em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 0.5em 1em;
-            border: none;
-            background: #4CAF50;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #45a049;
-        }
-
-        #calendar {
-            margin-top: 1em;
-        }
-
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            background: #4CAF50;
-            color: white;
-        }
-
-        .day-header {
-            padding: 0.5em;
-            text-align: center;
-        }
-
-        .calendar-body {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            background: #ddd;
-        }
-
-        .calendar-body div {
-            background: #fff;
-            min-height: 80px;
-            padding: 0.5em;
-        }
-
-        footer {
-            margin-top: 1em;
-        }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SI-JaNi - Dashboard</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      color: #333;
+      line-height: 1.6;
+    }
+    header, footer {
+      background: #4CAF50;
+      color: white;
+      padding: 1em;
+      text-align: center;
+    }
+    main {
+      max-width: 1200px;
+      margin: 1em auto;
+      padding: 1em;
+      background: white;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1em;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .month-navigation {
+      display: flex;
+      align-items: center;
+      gap: 0.5em;
+    }
+    #calendar {
+      margin-top: 1em;
+    }
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #4CAF50;
+      color: white;
+    }
+    .day-header {
+      padding: 0.5em;
+      text-align: center;
+    }
+    .calendar-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      gap: 1px;
+      background: #ddd;
+    }
+    .calendar-body div {
+      background: #fff;
+      min-height: 80px;
+      padding: 0.5em;
+      position: relative;
+    }
+    .event {
+      background: #ff9800;
+      color: white;
+      padding: 2px 4px;
+      border-radius: 4px;
+      font-size: 0.75em;
+      position: absolute;
+      bottom: 4px;
+      left: 4px;
+      right: 4px;
+      overflow: hidden;
+      white-space: nowrap;
+      text-overflow: ellipsis;
+    }
+    button {
+      padding: 0.5em 1em;
+      border: none;
+      background: #4CAF50;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #45a049;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background: rgba(0,0,0,0.5);
+    }
+    .modal-content {
+      background: white;
+      margin: 5% auto;
+      padding: 1em;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+    .form-group {
+      margin-bottom: 0.75em;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.3em;
+    }
+    .form-group input, .form-group select, .form-group textarea {
+      width: 100%;
+      padding: 0.5em;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>Dashboard SI-JaNi</h1>
-        <div class="user-info">Selamat datang, Udi!</div>
-    </header>
+  <header>
+    <h1>Dashboard SI-JaNi</h1>
+    <div class="user-info">Selamat datang, Udi!</div>
+  </header>
 
-    <main>
-        <div class="controls">
-            <div class="month-navigation">
-                <button id="prevMonth">&lt;</button>
-                <span id="currentMonth">Bulan</span>
-                <button id="nextMonth">&gt;</button>
-            </div>
-            <div class="filter">
-                <select id="categoryFilter">
-                    <option value="">Semua Kategori</option>
-                    <option value="nikah">Nikah</option>
-                    <option value="cerai">Cerai</option>
-                </select>
-            </div>
-        </div>
+  <main>
+    <div class="controls">
+      <div class="month-navigation">
+        <button id="prevMonth">&lt;</button>
+        <span id="currentMonth">Bulan</span>
+        <button id="nextMonth">&gt;</button>
+      </div>
+      <button id="btnAddSchedule">Tambah Jadwal</button>
+    </div>
 
-        <div id="calendar">
-            <div class="calendar-header">
-                <div class="day-header">Minggu</div>
-                <div class="day-header">Senin</div>
-                <div class="day-header">Selasa</div>
-                <div class="day-header">Rabu</div>
-                <div class="day-header">Kamis</div>
-                <div class="day-header">Jumat</div>
-                <div class="day-header">Sabtu</div>
-            </div>
-            <div class="calendar-body">
-                <!-- Kalender akan diisi dengan JS -->
-            </div>
-        </div>
-    </main>
+    <div id="calendar">
+      <div class="calendar-header">
+        <div class="day-header">Minggu</div>
+        <div class="day-header">Senin</div>
+        <div class="day-header">Selasa</div>
+        <div class="day-header">Rabu</div>
+        <div class="day-header">Kamis</div>
+        <div class="day-header">Jumat</div>
+        <div class="day-header">Sabtu</div>
+      </div>
+      <div class="calendar-body"></div>
+    </div>
+  </main>
 
-    <footer>
-        &copy; 2025 SI-JaNi
-    </footer>
+  <footer>
+    &copy; 2025 SI-JaNi
+  </footer>
 
-    <script>
-        const currentMonthEl = document.getElementById('currentMonth');
-        const calendarBody = document.querySelector('.calendar-body');
-        let today = new Date();
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
+  <!-- Modal Tambah Jadwal -->
+  <div class="modal" id="modalAdd">
+    <div class="modal-content">
+      <h2>Tambah Jadwal</h2>
+      <div class="form-group">
+        <label for="tanggal">Tanggal</label>
+        <input type="date" id="tanggal">
+      </div>
+      <div class="form-group">
+        <label for="kategori">Kategori</label>
+        <select id="kategori">
+          <option value="nikah">Nikah</option>
+          <option value="cerai">Cerai</option>
+        </select>
+      </div>
+      <div class="form-group">
+        <label for="deskripsi">Deskripsi</label>
+        <textarea id="deskripsi"></textarea>
+      </div>
+      <button id="saveJadwal">Simpan</button>
+      <button onclick="document.getElementById('modalAdd').style.display='none'">Tutup</button>
+    </div>
+  </div>
 
-        const monthNames = [
-            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-        ];
+  <script>
+    const currentMonthEl = document.getElementById('currentMonth');
+    const calendarBody = document.querySelector('.calendar-body');
+    let today = new Date();
+    let currentMonth = today.getMonth();
+    let currentYear = today.getFullYear();
+    let events = []; // Simpan data dummy
 
-        function renderCalendar(month, year) {
-            currentMonthEl.textContent = `${monthNames[month]} ${year}`;
-            calendarBody.innerHTML = "";
+    const monthNames = [
+      "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+      "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+    ];
 
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
+    function renderCalendar(month, year) {
+      currentMonthEl.textContent = `${monthNames[month]} ${year}`;
+      calendarBody.innerHTML = "";
 
-            // Isi hari kosong di awal
-            for (let i = 0; i < firstDay; i++) {
-                const emptyDiv = document.createElement('div');
-                emptyDiv.style.background = '#eee';
-                calendarBody.appendChild(emptyDiv);
-            }
+      const firstDay = new Date(year, month, 1).getDay();
+      const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-            // Isi hari-hari bulan ini
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayDiv = document.createElement('div');
-                dayDiv.textContent = day;
-                calendarBody.appendChild(dayDiv);
-            }
+      for (let i = 0; i < firstDay; i++) {
+        const emptyDiv = document.createElement('div');
+        emptyDiv.style.background = '#eee';
+        calendarBody.appendChild(emptyDiv);
+      }
+
+      for (let day = 1; day <= daysInMonth; day++) {
+        const dayDiv = document.createElement('div');
+        dayDiv.textContent = day;
+
+        // Cek ada event?
+        const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+        const eventToday = events.find(e => e.tanggal === dateStr);
+        if (eventToday) {
+          const evtEl = document.createElement('div');
+          evtEl.className = 'event';
+          evtEl.textContent = eventToday.kategori + ': ' + eventToday.deskripsi;
+          dayDiv.appendChild(evtEl);
         }
 
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar(currentMonth, currentYear);
-        });
+        calendarBody.appendChild(dayDiv);
+      }
+    }
 
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar(currentMonth, currentYear);
-        });
+    document.getElementById('prevMonth').addEventListener('click', () => {
+      currentMonth--;
+      if (currentMonth < 0) {
+        currentMonth = 11;
+        currentYear--;
+      }
+      renderCalendar(currentMonth, currentYear);
+    });
 
-        // Inisialisasi kalender pertama kali
+    document.getElementById('nextMonth').addEventListener('click', () => {
+      currentMonth++;
+      if (currentMonth > 11) {
+        currentMonth = 0;
+        currentYear++;
+      }
+      renderCalendar(currentMonth, currentYear);
+    });
+
+    document.getElementById('btnAddSchedule').addEventListener('click', () => {
+      document.getElementById('modalAdd').style.display = 'block';
+    });
+
+    document.getElementById('saveJadwal').addEventListener('click', () => {
+      const tanggal = document.getElementById('tanggal').value;
+      const kategori = document.getElementById('kategori').value;
+      const deskripsi = document.getElementById('deskripsi').value;
+
+      if (tanggal && kategori && deskripsi) {
+        events.push({ tanggal, kategori, deskripsi });
         renderCalendar(currentMonth, currentYear);
-    </script>
+        document.getElementById('modalAdd').style.display = 'none';
+      } else {
+        alert('Mohon lengkapi semua data!');
+      }
+    });
+
+    renderCalendar(currentMonth, currentYear);
+  </script>
 </body>
 </html>
