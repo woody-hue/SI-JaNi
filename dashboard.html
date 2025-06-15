@@ -17,7 +17,113 @@
   </header>
 
   <main>
-    <!-- Konten dashboard: kalender, table, modal, dsb. -->
+    <div class="controls">
+      <button id="addScheduleBtn">Tambah Jadwal</button>
+      <div class="month-navigation">
+        <button id="prevMonthBtn">&lt;</button>
+        <h3 id="currentMonthYear"></h3>
+        <button id="nextMonthBtn">&gt;</button>
+      </div>
+      <div class="filter">
+        <label for="locationFilter">Filter Lokasi:</label>
+        <select id="locationFilter">
+          <option value="all">Semua Lokasi</option>
+          <option value="KUA">Kantor KUA</option>
+          <option value="Lapangan">Lapangan</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="calendar">
+      <div class="calendar-header">
+        <div>Minggu</div>
+        <div>Senin</div>
+        <div>Selasa</div>
+        <div>Rabu</div>
+        <div>Kamis</div>
+        <div>Jumat</div>
+        <div>Sabtu</div>
+      </div>
+      <div class="calendar-body" id="calendarBody"></div>
+    </div>
+
+    <div class="schedule-list">
+      <h3>Daftar Jadwal Bulan Ini</h3>
+      <table id="scheduleTable">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Waktu</th>
+            <th>Pria</th>
+            <th>Wanita</th>
+            <th>HP</th>
+            <th>Lokasi</th>
+            <th>Status Berkas</th>
+            <th>Keterangan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="scheduleModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 id="modalTitle">Tambah Jadwal Nikah</h3>
+        <form id="scheduleForm">
+          <input type="hidden" id="scheduleId" />
+          <div>
+            <label>Nama Pria</label>
+            <input type="text" id="groomName" required />
+          </div>
+          <div>
+            <label>Nama Wanita</label>
+            <input type="text" id="brideName" required />
+          </div>
+          <div>
+            <label>HP Pria</label>
+            <input type="tel" id="groomPhone" required />
+          </div>
+          <div>
+            <label>HP Wanita</label>
+            <input type="tel" id="bridePhone" required />
+          </div>
+          <div>
+            <label>Tanggal</label>
+            <input type="date" id="weddingDate" required />
+          </div>
+          <div>
+            <label>Waktu</label>
+            <input type="time" id="weddingTime" required />
+          </div>
+          <div>
+            <label>Lokasi</label>
+            <select id="location" required>
+              <option value="KUA">Kantor KUA</option>
+              <option value="Lapangan">Lapangan</option>
+            </select>
+          </div>
+          <div id="locationDetailGroup" style="display: none;">
+            <label>Detail Lokasi</label>
+            <input type="text" id="locationDetail" />
+          </div>
+          <div>
+            <label>Status Berkas</label>
+            <select id="documentStatus" required>
+              <option value="Lengkap">Lengkap</option>
+              <option value="Kurang">Kurang</option>
+            </select>
+          </div>
+          <div>
+            <label>Keterangan</label>
+            <textarea id="notes"></textarea>
+          </div>
+          <button type="submit">Simpan</button>
+          <button type="button" id="deleteBtn" style="display: none;">Hapus</button>
+        </form>
+      </div>
+    </div>
   </main>
 
   <footer>
