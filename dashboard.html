@@ -4,181 +4,92 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SI-JaNi - Dashboard</title>
+    <link rel="stylesheet" href="css/style.css">
     <link rel="manifest" href="manifest.json">
-    <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
-
-        body {
-            font-family: Arial, sans-serif;
-            background: #f5f5f5;
-            color: #333;
-            line-height: 1.6;
-        }
-
-        header, footer {
-            background: #4CAF50;
-            color: white;
-            padding: 1em;
-            text-align: center;
-        }
-
-        .user-info {
-            margin-top: 0.5em;
-        }
-
-        main {
-            max-width: 1200px;
-            margin: 1em auto;
-            padding: 1em;
-            background: white;
-            border-radius: 8px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-        }
-
-        .controls {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 1em;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 1em;
-        }
-
-        .month-navigation {
-            display: flex;
-            align-items: center;
-            gap: 0.5em;
-        }
-
-        .filter {
-            flex: 1;
-            min-width: 200px;
-        }
-
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 1em;
-        }
-
-        th, td {
-            border: 1px solid #ddd;
-            padding: 0.5em;
-            text-align: center;
-        }
-
-        th {
-            background: #4CAF50;
-            color: white;
-        }
-
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 999;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            background: rgba(0,0,0,0.5);
-        }
-
-        .modal-content {
-            background: white;
-            margin: 5% auto;
-            padding: 1em;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 500px;
-        }
-
-        .form-group {
-            margin-bottom: 0.75em;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 0.3em;
-        }
-
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%;
-            padding: 0.5em;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-        }
-
-        button {
-            padding: 0.5em 1em;
-            border: none;
-            background: #4CAF50;
-            color: white;
-            border-radius: 4px;
-            cursor: pointer;
-        }
-
-        button:hover {
-            background: #45a049;
-        }
-
-        #calendar {
-            margin-top: 1em;
-        }
-
-        .calendar-header {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            background: #4CAF50;
-            color: white;
-        }
-
-        .day-header {
-            padding: 0.5em;
-            text-align: center;
-        }
-
-        .calendar-body {
-            display: grid;
-            grid-template-columns: repeat(7, 1fr);
-            gap: 1px;
-            background: #ddd;
-        }
-
-        .calendar-body div {
-            background: #fff;
-            min-height: 80px;
-            padding: 0.5em;
-        }
-
-        footer {
-            margin-top: 1em;
-        }
-    </style>
 </head>
 <body>
     <header>
-        <h1>Dashboard SI-JaNi</h1>
-        <div class="user-info">Selamat datang, Udi!</div>
+        <h1>SI-JaNi</h1>
+        <h2>Sistem Informasi Jadwal Nikah</h2>
+        <div class="user-info">
+            <span id="loggedInUser"></span>
+            <button id="logoutBtn">Logout</button>
+        </div>
     </header>
 
     <main>
         <div class="controls">
+            <button id="addScheduleBtn">Tambah Jadwal</button>
             <div class="month-navigation">
-                <button id="prevMonth">&lt;</button>
-                <span id="currentMonth">Bulan</span>
-                <button id="nextMonth">&gt;</button>
+                <button id="prevMonthBtn">&lt;</button>
+                <h3 id="currentMonthYear">Juni 2023</h3>
+                <button id="nextMonthBtn">&gt;</button>
             </div>
             <div class="filter">
-                <select id="categoryFilter">
-                    <option value="">Semua Kategori</option>
-                    <option value="nikah">Nikah</option>
-                    <option value="cerai">Cerai</option>
+                <label for="locationFilter">Filter Lokasi:</label>
+                <select id="locationFilter">
+                    <option value="all">Semua Lokasi</option>
+                    <option value="KUA">Kantor KUA</option>
+                    <option value="Lapangan">Lapangan</option>
                 </select>
+            </div>
+        </div>
+
+        <div id="scheduleModal" class="modal">
+            <div class="modal-content">
+                <span class="close">&times;</span>
+                <h3 id="modalTitle">Tambah Jadwal Nikah</h3>
+                <form id="scheduleForm">
+                    <input type="hidden" id="scheduleId">
+                    <div class="form-group">
+                        <label for="groomName">Nama Calon Pengantin Pria</label>
+                        <input type="text" id="groomName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="brideName">Nama Calon Pengantin Wanita</label>
+                        <input type="text" id="brideName" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="groomPhone">Nomor HP Calon Pria</label>
+                        <input type="tel" id="groomPhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="bridePhone">Nomor HP Calon Wanita</label>
+                        <input type="tel" id="bridePhone" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weddingDate">Tanggal Nikah</label>
+                        <input type="date" id="weddingDate" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="weddingTime">Waktu Nikah</label>
+                        <input type="time" id="weddingTime" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="location">Lokasi Nikah</label>
+                        <select id="location" required>
+                            <option value="KUA">Kantor KUA</option>
+                            <option value="Lapangan">Lapangan</option>
+                        </select>
+                    </div>
+                    <div class="form-group" id="locationDetailGroup" style="display: none;">
+                        <label for="locationDetail">Detail Lokasi Lapangan</label>
+                        <input type="text" id="locationDetail" placeholder="Alamat lengkap lokasi nikah">
+                    </div>
+                    <div class="form-group">
+                        <label for="documentStatus">Status Berkas</label>
+                        <select id="documentStatus" required>
+                            <option value="Lengkap">Lengkap</option>
+                            <option value="Kurang">Kurang</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="notes">Keterangan</label>
+                        <textarea id="notes" rows="3"></textarea>
+                    </div>
+                    <button type="submit">Simpan</button>
+                    <button type="button" id="deleteBtn" style="display: none;">Hapus</button>
+                </form>
             </div>
         </div>
 
@@ -192,70 +103,38 @@
                 <div class="day-header">Jumat</div>
                 <div class="day-header">Sabtu</div>
             </div>
-            <div class="calendar-body">
-                <!-- Kalender akan diisi dengan JS -->
+            <div class="calendar-body" id="calendarBody">
+                <!-- Calendar days will be populated by JavaScript -->
             </div>
+        </div>
+
+        <div class="schedule-list">
+            <h3>Daftar Jadwal Bulan Ini</h3>
+            <table id="scheduleTable">
+                <thead>
+                    <tr>
+                        <th>Tanggal</th>
+                        <th>Waktu</th>
+                        <th>Calon Pria</th>
+                        <th>Calon Wanita</th>
+                        <th>Nomor HP</th>
+                        <th>Lokasi</th>
+                        <th>Status Berkas</th>
+                        <th>Keterangan</th>
+                        <th>Aksi</th>
+                    </tr>
+                </thead>
+                <tbody id="scheduleTableBody">
+                    <!-- Schedule data will be populated by JavaScript -->
+                </tbody>
+            </table>
         </div>
     </main>
 
     <footer>
-        &copy; 2025 SI-JaNi
+        <p>Dikembangkan oleh Udi Wijaya</p>
     </footer>
 
-    <script>
-        const currentMonthEl = document.getElementById('currentMonth');
-        const calendarBody = document.querySelector('.calendar-body');
-        let today = new Date();
-        let currentMonth = today.getMonth();
-        let currentYear = today.getFullYear();
-
-        const monthNames = [
-            "Januari", "Februari", "Maret", "April", "Mei", "Juni",
-            "Juli", "Agustus", "September", "Oktober", "November", "Desember"
-        ];
-
-        function renderCalendar(month, year) {
-            currentMonthEl.textContent = `${monthNames[month]} ${year}`;
-            calendarBody.innerHTML = "";
-
-            const firstDay = new Date(year, month, 1).getDay();
-            const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-            // Isi hari kosong di awal
-            for (let i = 0; i < firstDay; i++) {
-                const emptyDiv = document.createElement('div');
-                emptyDiv.style.background = '#eee';
-                calendarBody.appendChild(emptyDiv);
-            }
-
-            // Isi hari-hari bulan ini
-            for (let day = 1; day <= daysInMonth; day++) {
-                const dayDiv = document.createElement('div');
-                dayDiv.textContent = day;
-                calendarBody.appendChild(dayDiv);
-            }
-        }
-
-        document.getElementById('prevMonth').addEventListener('click', () => {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar(currentMonth, currentYear);
-        });
-
-        document.getElementById('nextMonth').addEventListener('click', () => {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar(currentMonth, currentYear);
-        });
-
-        // Inisialisasi kalender pertama kali
-        renderCalendar(currentMonth, currentYear);
-    </script>
+    <script src="js/script.js"></script>
 </body>
 </html>
