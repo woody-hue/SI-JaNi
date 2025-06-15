@@ -17,7 +17,7 @@ body {
 
 header {
   background: rgba(74, 111, 165, 0.9);
-  color: white;
+  color: #fff;
   padding: 15px 20px;
   display: flex;
   justify-content: space-between;
@@ -27,8 +27,8 @@ header {
 
 .user-info {
   display: flex;
-  align-items: center;
   gap: 10px;
+  align-items: center;
 }
 
 main {
@@ -62,7 +62,8 @@ main {
   margin-bottom: 20px;
 }
 
-.calendar-header, .calendar-body {
+.calendar-header,
+.calendar-body {
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   gap: 5px;
@@ -94,7 +95,8 @@ main {
   overflow: hidden;
 }
 
-.schedule-list th, .schedule-list td {
+.schedule-list th,
+.schedule-list td {
   border: 1px solid #ddd;
   padding: 8px;
   text-align: center;
@@ -102,13 +104,13 @@ main {
 
 .schedule-list th {
   background: #4a6fa5;
-  color: white;
+  color: #fff;
 }
 
 button {
   padding: 8px 12px;
   background: #4a6fa5;
-  color: white;
+  color: #fff;
   border: none;
   border-radius: 4px;
   cursor: pointer;
@@ -136,7 +138,7 @@ footer {
   width: 100%;
   height: 100%;
   overflow: auto;
-  background: rgba(0,0,0,0.4);
+  background: rgba(0, 0, 0, 0.4);
 }
 
 .modal-content {
@@ -197,7 +199,8 @@ footer {
     align-items: flex-start;
   }
 
-  .calendar-header, .calendar-body {
+  .calendar-header,
+  .calendar-body {
     grid-template-columns: repeat(7, 1fr);
   }
 
