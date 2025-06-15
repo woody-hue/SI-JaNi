@@ -1,3 +1,6 @@
+let currentDate = new Date();
+let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('isLogin')) {
     window.location.href = 'index.html';
@@ -11,10 +14,12 @@ document.addEventListener('DOMContentLoaded', () => {
     localStorage.clear();
     window.location.href = 'index.html';
   });
-});
 
-let currentDate = new Date();
-let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+  setupControls();
+  setupModal();
+  renderCalendar();
+  renderScheduleList();
+});
 
 function setupControls() {
   document.getElementById('prevMonthBtn').addEventListener('click', () => {
@@ -22,13 +27,11 @@ function setupControls() {
     renderCalendar();
     renderScheduleList();
   });
-
   document.getElementById('nextMonthBtn').addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
     renderCalendar();
     renderScheduleList();
   });
-
   document.getElementById('locationFilter').addEventListener('change', renderScheduleList);
   document.getElementById('addScheduleBtn').addEventListener('click', () => openModal());
 }
@@ -39,36 +42,30 @@ function renderCalendar() {
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  document.getElementById('currentMonthYear').textContent =
-    currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
-
+  document.getElementById('currentMonthYear').textContent = currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
   const body = document.getElementById('calendarBody');
   body.innerHTML = '';
 
   for (let i = 0; i < firstDay; i++) {
     body.appendChild(document.createElement('div'));
   }
-
   for (let d = 1; d <= daysInMonth; d++) {
-    const cell = document.createElement('div');
-    cell.textContent = d;
-
+    const div = document.createElement('div');
+    div.textContent = d;
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
     if (schedules.some(s => s.date === dateStr)) {
-      cell.style.backgroundColor = 'rgba(74,111,165,0.1)';
+      div.style.background = 'rgba(74,111,165,0.2)';
     }
-
-    body.appendChild(cell);
+    body.appendChild(div);
   }
 }
 
 function renderScheduleList() {
   const tbody = document.getElementById('scheduleTableBody');
   tbody.innerHTML = '';
-
+  const filter = document.getElementById('locationFilter').value;
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
-  const filter = document.getElementById('locationFilter').value;
 
   schedules.filter(s => {
     const d = new Date(s.date);
@@ -93,29 +90,21 @@ function renderScheduleList() {
   });
 }
 
-// ===== MODAL =====
 function setupModal() {
   const modal = document.getElementById('scheduleModal');
-  const closeBtn = modal.querySelector('.close');
-
-  closeBtn.addEventListener('click', closeModal);
+  modal.querySelector('.close').addEventListener('click', closeModal);
   window.addEventListener('click', e => {
     if (e.target === modal) closeModal();
   });
-
   document.getElementById('scheduleForm').addEventListener('submit', e => {
     e.preventDefault();
     saveSchedule();
   });
-
   document.getElementById('location').addEventListener('change', e => {
-    const detailGroup = document.getElementById('locationDetailGroup');
-    detailGroup.style.display = e.target.value === 'Lapangan' ? 'block' : 'none';
+    document.getElementById('locationDetailGroup').style.display = e.target.value === 'Lapangan' ? 'block' : 'none';
   });
-
   document.getElementById('deleteBtn').addEventListener('click', () => {
-    const id = document.getElementById('scheduleId').value;
-    deleteSchedule(id);
+    deleteSchedule(document.getElementById('scheduleId').value);
     closeModal();
   });
 }
@@ -129,22 +118,12 @@ function openModal(data = null) {
 
   if (data) {
     document.getElementById('modalTitle').textContent = 'Edit Jadwal Nikah';
-    document.getElementById('scheduleId').value = data.id;
-    document.getElementById('groomName').value = data.groomName;
-    document.getElementById('brideName').value = data.brideName;
-    document.getElementById('groomPhone').value = data.groomPhone;
-    document.getElementById('bridePhone').value = data.bridePhone;
-    document.getElementById('weddingDate').value = data.date;
-    document.getElementById('weddingTime').value = data.time;
-    document.getElementById('location').value = data.location;
-    document.getElementById('documentStatus').value = data.documentStatus;
-    document.getElementById('notes').value = data.notes;
-    document.getElementById('locationDetail').value = data.locationDetail || '';
-
+    Object.keys(data).forEach(k => {
+      if (document.getElementById(k)) document.getElementById(k).value = data[k];
+    });
     if (data.location === 'Lapangan') {
       document.getElementById('locationDetailGroup').style.display = 'block';
     }
-
     document.getElementById('deleteBtn').style.display = 'inline-block';
   } else {
     document.getElementById('modalTitle').textContent = 'Tambah Jadwal Nikah';
@@ -157,10 +136,9 @@ function closeModal() {
   document.getElementById('scheduleModal').style.display = 'none';
 }
 
-// ===== CRUD =====
 function saveSchedule() {
   const id = document.getElementById('scheduleId').value || Date.now().toString();
-  const schedule = {
+  const data = {
     id,
     groomName: document.getElementById('groomName').value,
     brideName: document.getElementById('brideName').value,
@@ -174,11 +152,11 @@ function saveSchedule() {
     notes: document.getElementById('notes').value
   };
 
-  const idx = schedules.findIndex(s => s.id === id);
-  if (idx > -1) {
-    schedules[idx] = schedule;
+  const index = schedules.findIndex(s => s.id === id);
+  if (index > -1) {
+    schedules[index] = data;
   } else {
-    schedules.push(schedule);
+    schedules.push(data);
   }
 
   localStorage.setItem('schedules', JSON.stringify(schedules));
