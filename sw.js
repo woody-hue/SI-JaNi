@@ -3,7 +3,6 @@ const CACHE_VERSION = 'v2.2.0';
 const CACHE_NAME = `${APP_NAME}-${CACHE_VERSION}`;
 const OFFLINE_URL = 'offline.html';
 const PRECACHE_URLS = [
-  '/',
   'index.html',
   'dashboard.html',
   'css/style.css',
