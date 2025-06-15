@@ -7,7 +7,7 @@ const PRECACHE_URLS = [
   'index.html',
   'dashboard.html',
   'css/style.css',
-  'script.js',
+  'js/script.js',
   'manifest.json',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
