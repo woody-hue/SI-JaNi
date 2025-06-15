@@ -1,6 +1,50 @@
-// Inisialisasi aplikasi dengan update notification support
-document.addEventListener('DOMContentLoaded', function() {
-    checkLoginStatus();
+document.addEventListener('DOMContentLoaded', () => {
+  if (document.getElementById('loginForm')) {
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+
+      try {
+        const res = await fetch('/api/login', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ username, password })
+        });
+
+        const data = await res.json();
+
+        if (res.ok) {
+          localStorage.setItem('isLogin', 'true');
+          localStorage.setItem('token', data.token);
+          localStorage.setItem('user', JSON.stringify(data.user));
+          window.location.href = 'dashboard.html';
+        } else {
+          showNotification('Login Gagal', { body: data.message, type: 'error' });
+        }
+      } catch (err) {
+        showNotification('Error', { body: 'Terjadi kesalahan koneksi', type: 'error' });
+      }
+    });
+  }
+
+  if (document.getElementById('logoutBtn')) {
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      localStorage.clear();
+      window.location.href = 'index.html';
+    });
+  }
+
+  if (document.getElementById('loggedInUser')) {
+    if (!localStorage.getItem('isLogin')) {
+      window.location.href = 'index.html';
+    } else {
+      const user = JSON.parse(localStorage.getItem('user'));
+      document.getElementById('loggedInUser').textContent = `${user.name} (${user.role})`;
+    }
+  }
+});
+
     
     // Enhanced Service Worker Registration with Update Detection
     if ('serviceWorker' in navigator) {
