@@ -7,35 +7,21 @@ html {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  -webkit-tap-highlight-color: transparent;
+  font-family: 'Segoe UI', Tahoma, sans-serif;
 }
 
 body {
-  color: #333;
-  line-height: 1.6;
   min-height: 100vh;
-  position: relative;
   background-color: #4a6fa5;
-  overflow-x: hidden;
-}
-
-body::before,
-body::after {
-  content: "";
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 100%;
-  pointer-events: none;
+  position: relative;
 }
 
 body::before {
-  background-image: url('../images/bg-mobile.webp');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  background: url('../images/bg-mobile.webp') center/cover no-repeat;
   z-index: -2;
 }
 
@@ -46,122 +32,83 @@ body::before {
 }
 
 body::after {
+  content: "";
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
   background-color: rgba(74, 111, 165, 0.7);
   z-index: -1;
 }
 
-.login-container {
-  max-width: 400px;
-  margin: 50px auto;
-  padding: 30px;
-  background: rgba(255, 255, 255, 0.95);
-  border-radius: 10px;
-  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-  text-align: center;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  animation: fadeIn 0.5s ease-out;
-}
-
-.login-container h1 {
-  color: #4a6fa5;
-  margin-bottom: 10px;
-  font-size: 2rem;
-}
-
-.login-container h2,
-.login-container h3 {
-  color: #666;
-  margin-bottom: 10px;
-  font-weight: 500;
-}
-
-.logo img {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  object-fit: cover;
-  border: 3px solid #4a6fa5;
-}
-
-.input-group {
-  margin-bottom: 20px;
-  text-align: left;
-}
-
-.input-group label {
-  display: block;
-  margin-bottom: 8px;
-  font-weight: 600;
-  color: #555;
-}
-
-.input-group input {
-  width: 100%;
-  padding: 12px;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  font-size: 16px;
-  transition: 0.3s;
-}
-
-.input-group input:focus {
-  border-color: #4a6fa5;
-  outline: none;
-  box-shadow: 0 0 0 3px rgba(74, 111, 165, 0.2);
-}
-
-button {
-  background-color: #4a6fa5;
-  color: white;
-  border: none;
-  padding: 12px;
-  border-radius: 6px;
-  cursor: pointer;
-  font-size: 16px;
-  width: 100%;
-  font-weight: 600;
-  transition: 0.3s ease;
-}
-
-button:hover {
-  background-color: #3a5a80;
-  transform: translateY(-2px);
-}
-
-button:active {
-  transform: translateY(0);
-}
-
-.error-message {
-  color: #d9534f;
-  margin-top: 15px;
-  font-weight: 600;
-  padding: 10px;
-  background-color: rgba(217, 83, 79, 0.1);
-  border-radius: 4px;
-}
-
-footer {
-  text-align: center;
-  margin-top: 30px;
-  color: rgba(255, 255, 255, 0.8);
-  font-size: 0.9rem;
-}
-
 header {
-  background-color: rgba(74, 111, 165, 0.9);
-  color: white;
+  background: rgba(74, 111, 165, 0.9);
+  color: #fff;
   padding: 15px 20px;
   display: flex;
   justify-content: space-between;
   align-items: center;
   flex-wrap: wrap;
-  backdrop-filter: blur(5px);
-  -webkit-backdrop-filter: blur(5px);
-  position: sticky;
-  top: 0;
-  z-index: 100;
+}
+
+.user-info {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+main {
+  padding: 20px;
+}
+
+.controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 15px;
+}
+
+.month-navigation {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+}
+
+#scheduleTable {
+  background: #fff;
+  padding: 10px;
+  border-radius: 6px;
+  overflow-x: auto;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+th, td {
+  border: 1px solid #ddd;
+  padding: 8px;
+  text-align: center;
+}
+
+footer {
+  text-align: center;
+  padding: 10px;
+  font-size: 0.9rem;
+  color: rgba(255, 255, 255, 0.8);
+}
+
+button {
+  padding: 8px 12px;
+  border: none;
+  background: #4a6fa5;
+  color: white;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+button:hover {
+  background: #3a5a80;
 }
 
 @media (max-width: 768px) {
@@ -169,59 +116,11 @@ header {
     font-size: 15px;
   }
 
-  .login-container {
-    margin: 20px auto;
-    padding: 20px;
-    width: 90%;
-  }
-
   .controls {
     flex-direction: column;
-    align-items: stretch;
-  }
-
-  .month-navigation {
-    justify-content: center;
   }
 
   table {
     display: block;
-    overflow-x: auto;
-  }
-
-  .modal-content {
-    margin: 10% auto;
-    width: 95%;
-  }
-
-  .action-btn {
-    display: block;
-    width: 100%;
-    margin-bottom: 5px;
-  }
-}
-
-@keyframes fadeIn {
-  from {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-@media print {
-  body::before,
-  body::after {
-    display: none;
-  }
-
-  .login-container {
-    background: white;
-    box-shadow: none;
-    margin: 0;
-    padding: 0;
   }
 }
