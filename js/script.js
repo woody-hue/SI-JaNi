@@ -1,178 +1,213 @@
 document.addEventListener('DOMContentLoaded', () => {
-  setupLoginHandler();
-  setupLogoutHandler();
-  setupDashboardInfo();
-  registerServiceWorker();
-  requestNotificationPermission();
+  if (!localStorage.getItem('isLogin')) {
+    window.location.href = 'index.html';
+  } else {
+    const user = JSON.parse(localStorage.getItem('user'));
+    document.getElementById('loggedInUser').textContent = `${user.name} (${user.role})`;
+  }
+
+  setupCalendar();
+  setupControls();
+  setupModal();
+
+  document.getElementById('logoutBtn').addEventListener('click', () => {
+    localStorage.clear();
+    window.location.href = 'index.html';
+  });
 });
 
-// ========== LOGIN HANDLER ==========
-function setupLoginHandler() {
-  const form = document.getElementById('loginForm');
-  if (form) {
-    form.addEventListener('submit', async (e) => {
-      e.preventDefault();
-      const username = document.getElementById('username').value;
-      const password = document.getElementById('password').value;
+// ========== DATA & STATE ==========
+let currentDate = new Date();
+let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
 
-      try {
-        const res = await fetch('/api/login', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ username, password })
-        });
-        const data = await res.json();
-
-        if (res.ok) {
-          localStorage.setItem('isLogin', 'true');
-          localStorage.setItem('token', data.token);
-          localStorage.setItem('user', JSON.stringify(data.user));
-          window.location.href = 'dashboard.html';
-        } else {
-          showNotification('Login Gagal', { body: data.message, type: 'error' });
-        }
-      } catch {
-        showNotification('Error', { body: 'Terjadi kesalahan koneksi', type: 'error' });
-      }
-    });
-  }
+// ========== RENDER ==========
+function setupCalendar() {
+  renderCalendar(currentDate);
 }
 
-// ========== LOGOUT HANDLER ==========
-function setupLogoutHandler() {
-  const btn = document.getElementById('logoutBtn');
-  if (btn) {
-    btn.addEventListener('click', () => {
-      localStorage.clear();
-      window.location.href = 'index.html';
-    });
-  }
-}
+function renderCalendar(date) {
+  const calendarBody = document.getElementById('calendarBody');
+  calendarBody.innerHTML = '';
 
-// ========== DASHBOARD USER INFO ==========
-function setupDashboardInfo() {
-  const info = document.getElementById('loggedInUser');
-  if (info) {
-    if (!localStorage.getItem('isLogin')) {
-      window.location.href = 'index.html';
-    } else {
-      const user = JSON.parse(localStorage.getItem('user'));
-      info.textContent = `${user.name} (${user.role})`;
+  const year = date.getFullYear();
+  const month = date.getMonth();
+  const firstDay = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  document.getElementById('currentMonthYear').textContent = 
+    date.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+
+  for (let i = 0; i < firstDay; i++) {
+    calendarBody.appendChild(document.createElement('div'));
+  }
+
+  for (let d = 1; d <= daysInMonth; d++) {
+    const dayCell = document.createElement('div');
+    dayCell.textContent = d;
+
+    const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    const hasSchedule = schedules.some(s => s.date === dateStr);
+    if (hasSchedule) {
+      dayCell.style.backgroundColor = 'rgba(74,111,165,0.1)';
     }
+
+    calendarBody.appendChild(dayCell);
   }
+
+  renderScheduleList();
 }
 
-// ========== SERVICE WORKER ==========
-function registerServiceWorker() {
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js').then(reg => {
-      console.log('SW registered:', reg.scope);
-      reg.addEventListener('updatefound', () => {
-        const newWorker = reg.installing;
-        newWorker.addEventListener('statechange', () => {
-          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
-            showUpdateNotification();
-          }
-        });
-      });
-    }).catch(err => {
-      console.error('SW registration failed:', err);
-    });
+function renderScheduleList() {
+  const tbody = document.getElementById('scheduleTableBody');
+  tbody.innerHTML = '';
 
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      window.location.reload();
+  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear();
+  const filterLocation = document.getElementById('locationFilter').value;
+
+  schedules
+    .filter(s => {
+      const d = new Date(s.date);
+      return d.getMonth() === month && d.getFullYear() === year &&
+        (filterLocation === 'all' || s.location === filterLocation);
+    })
+    .forEach(s => {
+      const row = document.createElement('tr');
+      row.innerHTML = `
+        <td>${s.date}</td>
+        <td>${s.time}</td>
+        <td>${s.groomName}</td>
+        <td>${s.brideName}</td>
+        <td>${s.groomPhone} / ${s.bridePhone}</td>
+        <td>${s.location} ${s.locationDetail || ''}</td>
+        <td>${s.documentStatus}</td>
+        <td>${s.notes}</td>
+        <td>
+          <button onclick="editSchedule('${s.id}')">Edit</button>
+          <button onclick="deleteSchedule('${s.id}')">Hapus</button>
+        </td>
+      `;
+      tbody.appendChild(row);
     });
-  }
 }
 
-// ========== NOTIFICATIONS ==========
-function showNotification(title, options = {}) {
-  if ('Notification' in window && Notification.permission === 'granted') {
-    new Notification(title, options);
+// ========== CONTROL HANDLERS ==========
+function setupControls() {
+  document.getElementById('prevMonthBtn').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() - 1);
+    renderCalendar(currentDate);
+  });
+
+  document.getElementById('nextMonthBtn').addEventListener('click', () => {
+    currentDate.setMonth(currentDate.getMonth() + 1);
+    renderCalendar(currentDate);
+  });
+
+  document.getElementById('locationFilter').addEventListener('change', () => {
+    renderCalendar(currentDate);
+  });
+
+  document.getElementById('addScheduleBtn').addEventListener('click', () => {
+    openModal();
+  });
+}
+
+// ========== MODAL ==========
+function setupModal() {
+  const modal = document.getElementById('scheduleModal');
+  const closeBtn = modal.querySelector('.close');
+  const form = document.getElementById('scheduleForm');
+
+  closeBtn.addEventListener('click', closeModal);
+  window.addEventListener('click', e => {
+    if (e.target === modal) closeModal();
+  });
+
+  form.addEventListener('submit', e => {
+    e.preventDefault();
+    saveSchedule();
+  });
+
+  document.getElementById('location').addEventListener('change', e => {
+    const group = document.getElementById('locationDetailGroup');
+    group.style.display = e.target.value === 'Lapangan' ? 'block' : 'none';
+  });
+
+  document.getElementById('deleteBtn').addEventListener('click', () => {
+    deleteSchedule(document.getElementById('scheduleId').value);
+    closeModal();
+  });
+}
+
+function openModal(schedule = null) {
+  const modal = document.getElementById('scheduleModal');
+  const form = document.getElementById('scheduleForm');
+  modal.style.display = 'block';
+
+  if (schedule) {
+    document.getElementById('modalTitle').textContent = 'Edit Jadwal Nikah';
+    document.getElementById('scheduleId').value = schedule.id;
+    document.getElementById('groomName').value = schedule.groomName;
+    document.getElementById('brideName').value = schedule.brideName;
+    document.getElementById('groomPhone').value = schedule.groomPhone;
+    document.getElementById('bridePhone').value = schedule.bridePhone;
+    document.getElementById('weddingDate').value = schedule.date;
+    document.getElementById('weddingTime').value = schedule.time;
+    document.getElementById('location').value = schedule.location;
+    document.getElementById('locationDetail').value = schedule.locationDetail || '';
+    document.getElementById('documentStatus').value = schedule.documentStatus;
+    document.getElementById('notes').value = schedule.notes;
+    document.getElementById('locationDetailGroup').style.display = schedule.location === 'Lapangan' ? 'block' : 'none';
+    document.getElementById('deleteBtn').style.display = 'inline-block';
   } else {
-    createInAppNotification(title, options);
+    form.reset();
+    document.getElementById('modalTitle').textContent = 'Tambah Jadwal Nikah';
+    document.getElementById('scheduleId').value = '';
+    document.getElementById('locationDetailGroup').style.display = 'none';
+    document.getElementById('deleteBtn').style.display = 'none';
   }
 }
 
-function createInAppNotification(title, options) {
-  const notification = document.createElement('div');
-  notification.className = `notification ${options.type || 'info'}`;
-  const icon = options.type === 'error' ? '❌' :
-               options.type === 'success' ? '✅' : 'ℹ️';
-  notification.innerHTML = `
-    <span class="notification-icon">${icon}</span>
-    <div class="notification-content">
-      <strong>${title}</strong>
-      ${options.body ? `<p>${options.body}</p>` : ''}
-    </div>
-  `;
-  document.body.appendChild(notification);
-  setTimeout(() => notification.classList.add('show'), 10);
-  setTimeout(() => {
-    notification.classList.remove('show');
-    setTimeout(() => notification.remove(), 300);
-  }, options.duration || 5000);
+function closeModal() {
+  document.getElementById('scheduleModal').style.display = 'none';
 }
 
-function requestNotificationPermission() {
-  if ('Notification' in window) {
-    Notification.requestPermission().then(permission => {
-      if (permission === 'granted') {
-        console.log('Notification permission granted');
-      }
-    });
+// ========== CRUD ==========
+function saveSchedule() {
+  const id = document.getElementById('scheduleId').value || Date.now().toString();
+  const newSchedule = {
+    id,
+    groomName: document.getElementById('groomName').value,
+    brideName: document.getElementById('brideName').value,
+    groomPhone: document.getElementById('groomPhone').value,
+    bridePhone: document.getElementById('bridePhone').value,
+    date: document.getElementById('weddingDate').value,
+    time: document.getElementById('weddingTime').value,
+    location: document.getElementById('location').value,
+    locationDetail: document.getElementById('locationDetail').value,
+    documentStatus: document.getElementById('documentStatus').value,
+    notes: document.getElementById('notes').value
+  };
+
+  const index = schedules.findIndex(s => s.id === id);
+  if (index > -1) {
+    schedules[index] = newSchedule;
+  } else {
+    schedules.push(newSchedule);
   }
+
+  localStorage.setItem('schedules', JSON.stringify(schedules));
+  renderCalendar(currentDate);
+  closeModal();
 }
 
-function showUpdateNotification() {
-  if (confirm('Versi baru tersedia! Muat ulang sekarang?')) {
-    if (navigator.serviceWorker.controller) {
-      navigator.serviceWorker.controller.postMessage({ type: 'SKIP_WAITING' });
-    } else {
-      window.location.reload();
-    }
-  }
+function editSchedule(id) {
+  const schedule = schedules.find(s => s.id === id);
+  if (schedule) openModal(schedule);
 }
 
-// ========== STYLE UNTUK IN-APP NOTIFICATION ==========
-const style = document.createElement('style');
-style.textContent = `
-.notification {
-  position: fixed;
-  bottom: 20px;
-  right: 20px;
-  padding: 15px;
-  background: #4a6fa5;
-  color: white;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  max-width: 320px;
-  transform: translateY(100px);
-  opacity: 0;
-  transition: all 0.3s ease;
-  z-index: 1000;
+function deleteSchedule(id) {
+  schedules = schedules.filter(s => s.id !== id);
+  localStorage.setItem('schedules', JSON.stringify(schedules));
+  renderCalendar(currentDate);
 }
-.notification.show {
-  transform: translateY(0);
-  opacity: 1;
-}
-.notification.success { background: #28a745; }
-.notification.error { background: #dc3545; }
-.notification-icon { font-size: 20px; }
-.notification-content { flex: 1; }
-.notification-content p {
-  margin: 5px 0 0;
-  font-size: 14px;
-  opacity: 0.9;
-}
-@media (max-width: 480px) {
-  .notification {
-    left: 20px;
-    right: 20px;
-    max-width: none;
-  }
-}`;
-document.head.appendChild(style);
