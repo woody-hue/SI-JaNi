@@ -1,60 +1,57 @@
 document.addEventListener('DOMContentLoaded', () => {
+  // Cek login
   if (!localStorage.getItem('isLogin')) {
     window.location.href = 'index.html';
-  } else {
-    const user = JSON.parse(localStorage.getItem('user'));
-    document.getElementById('loggedInUser').textContent = `${user.name} (${user.role})`;
+    return;
   }
+  const user = JSON.parse(localStorage.getItem('user'));
+  document.getElementById('loggedInUser').textContent = `${user.name} (${user.role})`;
 
-  setupCalendar();
+  // Inisialisasi
   setupControls();
   setupModal();
+  renderCalendar();
+  renderScheduleList();
 
+  // Logout
   document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.clear();
     window.location.href = 'index.html';
   });
 });
 
-// ========== DATA & STATE ==========
+// ===== DATA =====
 let currentDate = new Date();
 let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
 
-// ========== RENDER ==========
-function setupCalendar() {
-  renderCalendar(currentDate);
-}
-
-function renderCalendar(date) {
-  const calendarBody = document.getElementById('calendarBody');
-  calendarBody.innerHTML = '';
-
-  const year = date.getFullYear();
-  const month = date.getMonth();
+// ===== RENDER =====
+function renderCalendar() {
+  const month = currentDate.getMonth();
+  const year = currentDate.getFullYear();
   const firstDay = new Date(year, month, 1).getDay();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  document.getElementById('currentMonthYear').textContent = 
-    date.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+  document.getElementById('currentMonthYear').textContent =
+    currentDate.toLocaleString('id-ID', { month: 'long', year: 'numeric' });
+
+  const body = document.getElementById('calendarBody');
+  body.innerHTML = '';
 
   for (let i = 0; i < firstDay; i++) {
-    calendarBody.appendChild(document.createElement('div'));
+    body.appendChild(document.createElement('div'));
   }
 
   for (let d = 1; d <= daysInMonth; d++) {
-    const dayCell = document.createElement('div');
-    dayCell.textContent = d;
+    const day = document.createElement('div');
+    day.textContent = d;
 
     const dateStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-    const hasSchedule = schedules.some(s => s.date === dateStr);
-    if (hasSchedule) {
-      dayCell.style.backgroundColor = 'rgba(74,111,165,0.1)';
+    if (schedules.some(s => s.date === dateStr)) {
+      day.style.backgroundColor = 'rgba(74,111,165,0.1)';
     }
 
-    calendarBody.appendChild(dayCell);
+    body.appendChild(day);
   }
-
-  renderScheduleList();
 }
 
 function renderScheduleList() {
@@ -63,13 +60,14 @@ function renderScheduleList() {
 
   const month = currentDate.getMonth();
   const year = currentDate.getFullYear();
-  const filterLocation = document.getElementById('locationFilter').value;
+  const filter = document.getElementById('locationFilter').value;
 
   schedules
     .filter(s => {
       const d = new Date(s.date);
-      return d.getMonth() === month && d.getFullYear() === year &&
-        (filterLocation === 'all' || s.location === filterLocation);
+      return d.getMonth() === month &&
+        d.getFullYear() === year &&
+        (filter === 'all' || s.location === filter);
     })
     .forEach(s => {
       const row = document.createElement('tr');
@@ -85,26 +83,27 @@ function renderScheduleList() {
         <td>
           <button onclick="editSchedule('${s.id}')">Edit</button>
           <button onclick="deleteSchedule('${s.id}')">Hapus</button>
-        </td>
-      `;
+        </td>`;
       tbody.appendChild(row);
     });
 }
 
-// ========== CONTROL HANDLERS ==========
+// ===== CONTROL =====
 function setupControls() {
   document.getElementById('prevMonthBtn').addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() - 1);
-    renderCalendar(currentDate);
+    renderCalendar();
+    renderScheduleList();
   });
 
   document.getElementById('nextMonthBtn').addEventListener('click', () => {
     currentDate.setMonth(currentDate.getMonth() + 1);
-    renderCalendar(currentDate);
+    renderCalendar();
+    renderScheduleList();
   });
 
   document.getElementById('locationFilter').addEventListener('change', () => {
-    renderCalendar(currentDate);
+    renderScheduleList();
   });
 
   document.getElementById('addScheduleBtn').addEventListener('click', () => {
@@ -112,25 +111,24 @@ function setupControls() {
   });
 }
 
-// ========== MODAL ==========
+// ===== MODAL =====
 function setupModal() {
   const modal = document.getElementById('scheduleModal');
   const closeBtn = modal.querySelector('.close');
-  const form = document.getElementById('scheduleForm');
 
   closeBtn.addEventListener('click', closeModal);
   window.addEventListener('click', e => {
     if (e.target === modal) closeModal();
   });
 
-  form.addEventListener('submit', e => {
+  document.getElementById('scheduleForm').addEventListener('submit', e => {
     e.preventDefault();
     saveSchedule();
   });
 
   document.getElementById('location').addEventListener('change', e => {
-    const group = document.getElementById('locationDetailGroup');
-    group.style.display = e.target.value === 'Lapangan' ? 'block' : 'none';
+    document.getElementById('locationDetailGroup').style.display =
+      e.target.value === 'Lapangan' ? 'block' : 'none';
   });
 
   document.getElementById('deleteBtn').addEventListener('click', () => {
@@ -139,43 +137,45 @@ function setupModal() {
   });
 }
 
-function openModal(schedule = null) {
-  const modal = document.getElementById('scheduleModal');
+function openModal(data = null) {
   const form = document.getElementById('scheduleForm');
-  modal.style.display = 'block';
+  form.reset();
+  document.getElementById('deleteBtn').style.display = 'none';
+  document.getElementById('locationDetailGroup').style.display = 'none';
+  document.getElementById('scheduleId').value = '';
 
-  if (schedule) {
+  if (data) {
     document.getElementById('modalTitle').textContent = 'Edit Jadwal Nikah';
-    document.getElementById('scheduleId').value = schedule.id;
-    document.getElementById('groomName').value = schedule.groomName;
-    document.getElementById('brideName').value = schedule.brideName;
-    document.getElementById('groomPhone').value = schedule.groomPhone;
-    document.getElementById('bridePhone').value = schedule.bridePhone;
-    document.getElementById('weddingDate').value = schedule.date;
-    document.getElementById('weddingTime').value = schedule.time;
-    document.getElementById('location').value = schedule.location;
-    document.getElementById('locationDetail').value = schedule.locationDetail || '';
-    document.getElementById('documentStatus').value = schedule.documentStatus;
-    document.getElementById('notes').value = schedule.notes;
-    document.getElementById('locationDetailGroup').style.display = schedule.location === 'Lapangan' ? 'block' : 'none';
+    document.getElementById('scheduleId').value = data.id;
+    document.getElementById('groomName').value = data.groomName;
+    document.getElementById('brideName').value = data.brideName;
+    document.getElementById('groomPhone').value = data.groomPhone;
+    document.getElementById('bridePhone').value = data.bridePhone;
+    document.getElementById('weddingDate').value = data.date;
+    document.getElementById('weddingTime').value = data.time;
+    document.getElementById('location').value = data.location;
+    document.getElementById('documentStatus').value = data.documentStatus;
+    document.getElementById('notes').value = data.notes;
+    document.getElementById('locationDetail').value = data.locationDetail || '';
+    if (data.location === 'Lapangan') {
+      document.getElementById('locationDetailGroup').style.display = 'block';
+    }
     document.getElementById('deleteBtn').style.display = 'inline-block';
   } else {
-    form.reset();
     document.getElementById('modalTitle').textContent = 'Tambah Jadwal Nikah';
-    document.getElementById('scheduleId').value = '';
-    document.getElementById('locationDetailGroup').style.display = 'none';
-    document.getElementById('deleteBtn').style.display = 'none';
   }
+
+  document.getElementById('scheduleModal').style.display = 'block';
 }
 
 function closeModal() {
   document.getElementById('scheduleModal').style.display = 'none';
 }
 
-// ========== CRUD ==========
+// ===== CRUD =====
 function saveSchedule() {
   const id = document.getElementById('scheduleId').value || Date.now().toString();
-  const newSchedule = {
+  const schedule = {
     id,
     groomName: document.getElementById('groomName').value,
     brideName: document.getElementById('brideName').value,
@@ -191,23 +191,25 @@ function saveSchedule() {
 
   const index = schedules.findIndex(s => s.id === id);
   if (index > -1) {
-    schedules[index] = newSchedule;
+    schedules[index] = schedule;
   } else {
-    schedules.push(newSchedule);
+    schedules.push(schedule);
   }
 
   localStorage.setItem('schedules', JSON.stringify(schedules));
-  renderCalendar(currentDate);
+  renderCalendar();
+  renderScheduleList();
   closeModal();
 }
 
 function editSchedule(id) {
-  const schedule = schedules.find(s => s.id === id);
-  if (schedule) openModal(schedule);
+  const data = schedules.find(s => s.id === id);
+  if (data) openModal(data);
 }
 
 function deleteSchedule(id) {
   schedules = schedules.filter(s => s.id !== id);
   localStorage.setItem('schedules', JSON.stringify(schedules));
-  renderCalendar(currentDate);
+  renderCalendar();
+  renderScheduleList();
 }
