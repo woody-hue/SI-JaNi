@@ -1,17 +1,11 @@
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('isLogin')) {
-    console.log('User belum login, redirect ke index.html');
     window.location.href = 'index.html';
     return;
   }
 
   const user = JSON.parse(localStorage.getItem('user'));
   document.getElementById('loggedInUser').textContent = `${user.name} (${user.role})`;
-
-  setupControls();
-  setupModal();
-  renderCalendar();
-  renderScheduleList();
 
   document.getElementById('logoutBtn').addEventListener('click', () => {
     localStorage.clear();
