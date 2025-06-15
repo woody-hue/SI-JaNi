@@ -2,6 +2,7 @@ const APP_NAME = 'SI-JaNi';
 const CACHE_VERSION = 'v2.2.0';
 const CACHE_NAME = `${APP_NAME}-${CACHE_VERSION}`;
 const OFFLINE_URL = 'offline.html';
+
 const PRECACHE_URLS = [
   'index.html',
   'dashboard.html',
@@ -17,34 +18,36 @@ const PRECACHE_URLS = [
 
 self.addEventListener('install', event => {
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => {
-      console.log('[SW] Installing new version:', CACHE_VERSION);
-      return cache.addAll(PRECACHE_URLS).then(() => {
+    caches.open(CACHE_NAME)
+      .then(cache => {
+        console.log('[SW] Installing new version:', CACHE_VERSION);
+        return cache.addAll(PRECACHE_URLS);
+      })
+      .then(() => {
         console.log('[SW] Precaching complete');
         return self.skipWaiting();
-      }).catch(err => {
+      })
+      .catch(err => {
         console.error('[SW] Precaching failed:', err);
-        throw err;
-      });
-    })
+      })
   );
 });
 
 self.addEventListener('activate', event => {
   event.waitUntil(
-    caches.keys().then(cacheNames => {
-      return Promise.all(
-        cacheNames.map(cacheName => {
-          if (cacheName !== CACHE_NAME && cacheName.startsWith(APP_NAME)) {
-            console.log('[SW] Removing old cache:', cacheName);
-            return caches.delete(cacheName);
+    caches.keys()
+      .then(keys => Promise.all(
+        keys.map(key => {
+          if (key !== CACHE_NAME && key.startsWith(APP_NAME)) {
+            console.log('[SW] Removing old cache:', key);
+            return caches.delete(key);
           }
         })
-      );
-    }).then(() => {
-      console.log('[SW] Claiming clients');
-      self.clients.claim();
-    })
+      ))
+      .then(() => {
+        console.log('[SW] Claiming clients');
+        return self.clients.claim();
+      })
   );
 });
 
@@ -64,17 +67,19 @@ self.addEventListener('fetch', event => {
 
   if (request.url.includes('/api/')) {
     event.respondWith(
-      fetch(request).then(networkResponse => {
-        const clone = networkResponse.clone();
-        caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-        return networkResponse;
-      }).catch(() => caches.match(request))
+      fetch(request)
+        .then(res => {
+          const clone = res.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
+          return res;
+        })
+        .catch(() => caches.match(request))
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then(cachedResponse => cachedResponse || fetch(request))
+    caches.match(request).then(cached => cached || fetch(request))
   );
 });
 
@@ -92,14 +97,14 @@ self.addEventListener('sync', event => {
 });
 
 self.addEventListener('push', event => {
-  const data = event.data.json();
+  const data = event.data?.json() || {};
   event.waitUntil(
     self.registration.showNotification(data.title || 'SI-JaNi Update', {
-      body: data.body || 'New content is available!',
+      body: data.body || 'Ada update terbaru!',
       icon: 'icons/icon-192x192.png',
       badge: 'icons/icon-72x72.png',
       data: {
-        url: data.url || '/'
+        url: data.url || 'index.html'
       }
     })
   );
@@ -109,10 +114,14 @@ self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then(clientList => {
-      if (clientList.length > 0) {
-        return clientList[0].focus();
+      for (const client of clientList) {
+        if (client.url === event.notification.data.url && 'focus' in client) {
+          return client.focus();
+        }
       }
-      return clients.openWindow(event.notification.data.url);
+      if (clients.openWindow) {
+        return clients.openWindow(event.notification.data.url);
+      }
     })
   );
 });
