@@ -1,5 +1,5 @@
 const APP_NAME = 'SI-JaNi';
-const CACHE_VERSION = 'v2.2.0';
+const CACHE_VERSION = 'v2.3.0';  // Bump version kalau update file
 const CACHE_NAME = `${APP_NAME}-${CACHE_VERSION}`;
 const OFFLINE_URL = 'offline.html';
 
@@ -8,6 +8,7 @@ const PRECACHE_URLS = [
   'dashboard.html',
   'css/style.css',
   'js/script.js',
+  'js/login.js',
   'manifest.json',
   'icons/icon-192x192.png',
   'icons/icon-512x512.png',
@@ -20,16 +21,11 @@ self.addEventListener('install', event => {
   event.waitUntil(
     caches.open(CACHE_NAME)
       .then(cache => {
-        console.log('[SW] Installing new version:', CACHE_VERSION);
+        console.log('[SW] Installing version:', CACHE_VERSION);
         return cache.addAll(PRECACHE_URLS);
       })
-      .then(() => {
-        console.log('[SW] Precaching complete');
-        return self.skipWaiting();
-      })
-      .catch(err => {
-        console.error('[SW] Precaching failed:', err);
-      })
+      .then(() => self.skipWaiting())
+      .catch(err => console.error('[SW] Precaching failed:', err))
   );
 });
 
@@ -39,41 +35,22 @@ self.addEventListener('activate', event => {
       .then(keys => Promise.all(
         keys.map(key => {
           if (key !== CACHE_NAME && key.startsWith(APP_NAME)) {
-            console.log('[SW] Removing old cache:', key);
+            console.log('[SW] Deleting old cache:', key);
             return caches.delete(key);
           }
         })
       ))
-      .then(() => {
-        console.log('[SW] Claiming clients');
-        return self.clients.claim();
-      })
+      .then(() => self.clients.claim())
   );
 });
 
 self.addEventListener('fetch', event => {
   const { request } = event;
-
-  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) {
-    return;
-  }
+  if (request.method !== 'GET' || !request.url.startsWith(self.location.origin)) return;
 
   if (request.mode === 'navigate') {
     event.respondWith(
       fetch(request).catch(() => caches.match(OFFLINE_URL))
-    );
-    return;
-  }
-
-  if (request.url.includes('/api/')) {
-    event.respondWith(
-      fetch(request)
-        .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
-          return res;
-        })
-        .catch(() => caches.match(request))
     );
     return;
   }
@@ -103,9 +80,7 @@ self.addEventListener('push', event => {
       body: data.body || 'Ada update terbaru!',
       icon: 'icons/icon-192x192.png',
       badge: 'icons/icon-72x72.png',
-      data: {
-        url: data.url || 'index.html'
-      }
+      data: { url: data.url || 'index.html' }
     })
   );
 });
@@ -113,15 +88,13 @@ self.addEventListener('push', event => {
 self.addEventListener('notificationclick', event => {
   event.notification.close();
   event.waitUntil(
-    clients.matchAll({ type: 'window' }).then(clientList => {
-      for (const client of clientList) {
+    clients.matchAll({ type: 'window' }).then(clientsArr => {
+      for (const client of clientsArr) {
         if (client.url === event.notification.data.url && 'focus' in client) {
           return client.focus();
         }
       }
-      if (clients.openWindow) {
-        return clients.openWindow(event.notification.data.url);
-      }
+      if (clients.openWindow) return clients.openWindow(event.notification.data.url);
     })
   );
 });
