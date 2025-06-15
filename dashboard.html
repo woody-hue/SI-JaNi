@@ -1,140 +1,368 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SI-JaNi - Dashboard</title>
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="manifest" href="manifest.json">
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>SI-JaNi - Dashboard</title>
+  <link rel="manifest" href="manifest.json" />
+  <link rel="icon" href="favicon.ico" type="image/x-icon" />
+  <style>
+    html {
+      scroll-behavior: smooth;
+      font-size: 16px;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+
+    body {
+      min-height: 100vh;
+      background-color: #4a6fa5;
+      position: relative;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('images/bg-mobile.webp') center/cover no-repeat;
+      z-index: -2;
+    }
+
+    @media (min-width: 768px) {
+      body::before {
+        background-image: url('images/bg-desktop.webp');
+      }
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(74, 111, 165, 0.7);
+      z-index: -1;
+    }
+
+    header {
+      background: rgba(74, 111, 165, 0.9);
+      color: #fff;
+      padding: 15px 20px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .user-info {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    main {
+      padding: 20px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-bottom: 15px;
+    }
+
+    .month-navigation {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    .filter {
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+
+    button {
+      padding: 8px 12px;
+      border: none;
+      background: #4a6fa5;
+      color: white;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+
+    button:hover {
+      background: #3a5a80;
+    }
+
+    #calendar {
+      background: #fff;
+      padding: 10px;
+      border-radius: 6px;
+      margin-bottom: 20px;
+    }
+
+    .calendar-header {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      background: #4a6fa5;
+      color: white;
+    }
+
+    .day-header {
+      text-align: center;
+      padding: 8px 0;
+    }
+
+    .calendar-body {
+      display: grid;
+      grid-template-columns: repeat(7, 1fr);
+      min-height: 200px;
+    }
+
+    .calendar-body div {
+      border: 1px solid #ddd;
+      min-height: 60px;
+      padding: 2px;
+      font-size: 0.9rem;
+    }
+
+    .schedule-list {
+      background: #fff;
+      padding: 10px;
+      border-radius: 6px;
+    }
+
+    #scheduleTable {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    #scheduleTable th {
+      background: #4a6fa5;
+      color: white;
+    }
+
+    #scheduleTable th,
+    #scheduleTable td {
+      border: 1px solid #ddd;
+      padding: 5px;
+      font-size: 0.85rem;
+      text-align: center;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 200;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.5);
+    }
+
+    .modal-content {
+      background: #fff;
+      margin: 5% auto;
+      padding: 20px;
+      border-radius: 8px;
+      width: 90%;
+      max-width: 500px;
+    }
+
+    .close {
+      float: right;
+      font-size: 24px;
+      cursor: pointer;
+    }
+
+    .form-group {
+      margin-bottom: 10px;
+    }
+
+    .form-group label {
+      display: block;
+      margin-bottom: 4px;
+      font-weight: bold;
+    }
+
+    .form-group input,
+    .form-group select,
+    .form-group textarea {
+      width: 100%;
+      padding: 8px;
+      border: 1px solid #ddd;
+      border-radius: 4px;
+    }
+
+    #deleteBtn {
+      background: #dc3545;
+      color: white;
+      margin-left: 5px;
+    }
+
+    #deleteBtn:hover {
+      background: #c82333;
+    }
+
+    footer {
+      text-align: center;
+      padding: 10px;
+      font-size: 0.9rem;
+      color: rgba(255, 255, 255, 0.8);
+    }
+
+    @media (max-width: 768px) {
+      html {
+        font-size: 15px;
+      }
+
+      .controls {
+        flex-direction: column;
+      }
+
+      table {
+        display: block;
+        overflow-x: auto;
+      }
+    }
+  </style>
 </head>
 <body>
-    <header>
-        <h1>SI-JaNi</h1>
-        <h2>Sistem Informasi Jadwal Nikah</h2>
-        <div class="user-info">
-            <span id="loggedInUser"></span>
-            <button id="logoutBtn">Logout</button>
-        </div>
-    </header>
-    
-    <main>
-        <div class="controls">
-            <button id="addScheduleBtn">Tambah Jadwal</button>
-            <div class="month-navigation">
-                <button id="prevMonthBtn">&lt;</button>
-                <h3 id="currentMonthYear">Juni 2023</h3>
-                <button id="nextMonthBtn">&gt;</button>
-            </div>
-            <div class="filter">
-                <label for="locationFilter">Filter Lokasi:</label>
-                <select id="locationFilter">
-                    <option value="all">Semua Lokasi</option>
-                    <option value="KUA">Kantor KUA</option>
-                    <option value="Lapangan">Lapangan</option>
-                </select>
-            </div>
-        </div>
-        
-        <div id="scheduleModal" class="modal">
-            <div class="modal-content">
-                <span class="close">&times;</span>
-                <h3 id="modalTitle">Tambah Jadwal Nikah</h3>
-                <form id="scheduleForm">
-                    <input type="hidden" id="scheduleId">
-                    <div class="form-group">
-                        <label for="groomName">Nama Calon Pengantin Pria</label>
-                        <input type="text" id="groomName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="brideName">Nama Calon Pengantin Wanita</label>
-                        <input type="text" id="brideName" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="groomPhone">Nomor HP Calon Pria</label>
-                        <input type="tel" id="groomPhone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="bridePhone">Nomor HP Calon Wanita</label>
-                        <input type="tel" id="bridePhone" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weddingDate">Tanggal Nikah</label>
-                        <input type="date" id="weddingDate" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="weddingTime">Waktu Nikah</label>
-                        <input type="time" id="weddingTime" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="location">Lokasi Nikah</label>
-                        <select id="location" required>
-                            <option value="KUA">Kantor KUA</option>
-                            <option value="Lapangan">Lapangan</option>
-                        </select>
-                    </div>
-                    <div class="form-group" id="locationDetailGroup" style="display: none;">
-                        <label for="locationDetail">Detail Lokasi Lapangan</label>
-                        <input type="text" id="locationDetail" placeholder="Alamat lengkap lokasi nikah">
-                    </div>
-                    <div class="form-group">
-                        <label for="documentStatus">Status Berkas</label>
-                        <select id="documentStatus" required>
-                            <option value="Lengkap">Lengkap</option>
-                            <option value="Kurang">Kurang</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <label for="notes">Keterangan</label>
-                        <textarea id="notes" rows="3"></textarea>
-                    </div>
-                    <button type="submit">Simpan</button>
-                    <button type="button" id="deleteBtn" style="display: none;">Hapus</button>
-                </form>
-            </div>
-        </div>
-        
-        <div id="calendar">
-            <div class="calendar-header">
-                <div class="day-header">Minggu</div>
-                <div class="day-header">Senin</div>
-                <div class="day-header">Selasa</div>
-                <div class="day-header">Rabu</div>
-                <div class="day-header">Kamis</div>
-                <div class="day-header">Jumat</div>
-                <div class="day-header">Sabtu</div>
-            </div>
-            <div class="calendar-body" id="calendarBody">
-                <!-- Calendar days will be populated by JavaScript -->
-            </div>
-        </div>
-        
-        <div class="schedule-list">
-            <h3>Daftar Jadwal Bulan Ini</h3>
-            <table id="scheduleTable">
-                <thead>
-                    <tr>
-                        <th>Tanggal</th>
-                        <th>Waktu</th>
-                        <th>Calon Pria</th>
-                        <th>Calon Wanita</th>
-                        <th>Nomor HP</th>
-                        <th>Lokasi</th>
-                        <th>Status Berkas</th>
-                        <th>Keterangan</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
-                <tbody id="scheduleTableBody">
-                    <!-- Schedule data will be populated by JavaScript -->
-                </tbody>
-            </table>
-        </div>
-    </main>
-    
-    <footer>
-        <p>Dikembangkan oleh Udi Wijaya</p>
-    </footer>
-    
-    <script src="js/script.js"></script>
+  <header>
+    <h1>SI-JaNi</h1>
+    <h2>Sistem Informasi Jadwal Nikah</h2>
+    <div class="user-info">
+      <span id="loggedInUser"></span>
+      <button id="logoutBtn">Logout</button>
+    </div>
+  </header>
+
+  <main>
+    <div class="controls">
+      <button id="addScheduleBtn">Tambah Jadwal</button>
+      <div class="month-navigation">
+        <button id="prevMonthBtn">&lt;</button>
+        <h3 id="currentMonthYear">Juni 2023</h3>
+        <button id="nextMonthBtn">&gt;</button>
+      </div>
+      <div class="filter">
+        <label for="locationFilter">Filter Lokasi:</label>
+        <select id="locationFilter">
+          <option value="all">Semua Lokasi</option>
+          <option value="KUA">Kantor KUA</option>
+          <option value="Lapangan">Lapangan</option>
+        </select>
+      </div>
+    </div>
+
+    <div id="calendar">
+      <div class="calendar-header">
+        <div class="day-header">Minggu</div>
+        <div class="day-header">Senin</div>
+        <div class="day-header">Selasa</div>
+        <div class="day-header">Rabu</div>
+        <div class="day-header">Kamis</div>
+        <div class="day-header">Jumat</div>
+        <div class="day-header">Sabtu</div>
+      </div>
+      <div class="calendar-body" id="calendarBody"></div>
+    </div>
+
+    <div class="schedule-list">
+      <h3>Daftar Jadwal Bulan Ini</h3>
+      <table id="scheduleTable">
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Waktu</th>
+            <th>Calon Pria</th>
+            <th>Calon Wanita</th>
+            <th>Nomor HP</th>
+            <th>Lokasi</th>
+            <th>Status Berkas</th>
+            <th>Keterangan</th>
+            <th>Aksi</th>
+          </tr>
+        </thead>
+        <tbody id="scheduleTableBody"></tbody>
+      </table>
+    </div>
+
+    <div id="scheduleModal" class="modal">
+      <div class="modal-content">
+        <span class="close">&times;</span>
+        <h3 id="modalTitle">Tambah Jadwal Nikah</h3>
+        <form id="scheduleForm">
+          <input type="hidden" id="scheduleId" />
+          <div class="form-group">
+            <label for="groomName">Nama Calon Pengantin Pria</label>
+            <input type="text" id="groomName" required />
+          </div>
+          <div class="form-group">
+            <label for="brideName">Nama Calon Pengantin Wanita</label>
+            <input type="text" id="brideName" required />
+          </div>
+          <div class="form-group">
+            <label for="groomPhone">Nomor HP Calon Pria</label>
+            <input type="tel" id="groomPhone" required />
+          </div>
+          <div class="form-group">
+            <label for="bridePhone">Nomor HP Calon Wanita</label>
+            <input type="tel" id="bridePhone" required />
+          </div>
+          <div class="form-group">
+            <label for="weddingDate">Tanggal Nikah</label>
+            <input type="date" id="weddingDate" required />
+          </div>
+          <div class="form-group">
+            <label for="weddingTime">Waktu Nikah</label>
+            <input type="time" id="weddingTime" required />
+          </div>
+          <div class="form-group">
+            <label for="location">Lokasi Nikah</label>
+            <select id="location" required>
+              <option value="KUA">Kantor KUA</option>
+              <option value="Lapangan">Lapangan</option>
+            </select>
+          </div>
+          <div class="form-group" id="locationDetailGroup" style="display: none;">
+            <label for="locationDetail">Detail Lokasi Lapangan</label>
+            <input type="text" id="locationDetail" placeholder="Alamat lengkap lokasi nikah" />
+          </div>
+          <div class="form-group">
+            <label for="documentStatus">Status Berkas</label>
+            <select id="documentStatus" required>
+              <option value="Lengkap">Lengkap</option>
+              <option value="Kurang">Kurang</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="notes">Keterangan</label>
+            <textarea id="notes" rows="3"></textarea>
+          </div>
+          <button type="submit">Simpan</button>
+          <button type="button" id="deleteBtn" style="display: none;">Hapus</button>
+        </form>
+      </div>
+    </div>
+  </main>
+
+  <footer>
+    <p>Dikembangkan oleh Udi Wijaya</p>
+  </footer>
+
+  <script src="js/script.js"></script>
 </body>
 </html>
