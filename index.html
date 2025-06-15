@@ -13,14 +13,14 @@
     <meta name="apple-mobile-web-app-title" content="SI-JaNi">
     
     <!-- Preload Background Images -->
-    <link rel="preload" href="/SI-JaNi/images/bg-mobile.webp" as="image" media="(max-width: 767px)">
-    <link rel="preload" href="/SI-JaNi/images/bg-desktop.webp" as="image" media="(min-width: 768px)">
+    <link rel="preload" href="/images/bg-mobile.webp" as="image" media="(max-width: 767px)">
+    <link rel="preload" href="/images/bg-desktop.webp" as="image" media="(min-width: 768px)">
     
     <!-- Icons -->
-    <link rel="icon" href="/SI-JaNi/favicon.ico" type="image/x-icon">
-    <link rel="icon" type="image/png" sizes="192x192" href="/SI-JaNi/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/SI-JaNi/icons/icon-512x512.png">
-    <link rel="apple-touch-icon" href="/SI-JaNi/icons/icon-192x192.png">
+    <link rel="icon" href="/favicon.ico" type="image/x-icon">
+    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
+    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
     
     <!-- Manifest -->
     <link rel="manifest" href="/SI-JaNi/manifest.json">
@@ -29,7 +29,7 @@
     <title>SI-JaNi - KUA Belitang Hilir</title>
     
     <!-- CSS -->
-    <link rel="stylesheet" href="/SI-JaNi/css/style.css">
+    <link rel="stylesheet" href="/css/style.css">
     
     <style>
         /* Inline Critical CSS untuk background */
@@ -47,7 +47,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background-image: url('/SI-JaNi/images/bg-mobile.webp');
+            background-image: url('/images/bg-mobile.webp');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -55,7 +55,7 @@
         }
         @media (min-width: 768px) {
             body::before {
-                background-image: url('/SI-JaNi/images/bg-desktop.webp');
+                background-image: url('/images/bg-desktop.webp');
             }
         }
         body::after {
@@ -74,7 +74,7 @@
     <div class="login-container">
         <header>
             <div class="logo">
-                <img src="/SI-JaNi/icons/icon-192x192.png" alt="Logo SI-JaNi" width="80">
+                <img src="/icons/icon-192x192.png" alt="Logo SI-JaNi" width="80">
             </div>
             <h1>SI-JaNi</h1>
             <h2>Sistem Informasi Jadwal Nikah</h2>
@@ -108,7 +108,7 @@
     <script>
         if ('serviceWorker' in navigator) {
             window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/SI-JaNi/sw.js')
+                navigator.serviceWorker.register('/sw.js')
                     .then(registration => {
                         console.log('SW registered: ', registration.scope);
                     })
