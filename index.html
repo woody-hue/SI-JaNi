@@ -1,122 +1,110 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <!-- Meta Essentials -->
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="Sistem Informasi Jadwal Nikah KUA Belitang Hilir">
-    
-    <!-- PWA Configuration -->
-    <meta name="theme-color" content="#4a6fa5">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="apple-mobile-web-app-title" content="SI-JaNi">
-    
-    <!-- Preload Background Images -->
-    <link rel="preload" href="/images/bg-mobile.webp" as="image" media="(max-width: 767px)">
-    <link rel="preload" href="/images/bg-desktop.webp" as="image" media="(min-width: 768px)">
-    
-    <!-- Icons -->
-    <link rel="icon" href="/favicon.ico" type="image/x-icon">
-    <link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192x192.png">
-    <link rel="icon" type="image/png" sizes="512x512" href="/icons/icon-512x512.png">
-    <link rel="apple-touch-icon" href="/icons/icon-192x192.png">
-    
-    <!-- Manifest -->
-    <link rel="manifest" href="/SI-JaNi/manifest.json">
-    
-    <!-- Title -->
-    <title>SI-JaNi - KUA Belitang Hilir</title>
-    
-    <!-- CSS -->
-    <link rel="stylesheet" href="/css/style.css">
-    
-    <style>
-        /* Inline Critical CSS untuk background */
-        body {
-            background-color: #4a6fa5;
-            margin: 0;
-            padding: 0;
-            min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, sans-serif;
-        }
-        body::before {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: url('/images/bg-mobile.webp');
-            background-size: cover;
-            background-position: center;
-            background-repeat: no-repeat;
-            z-index: -1;
-        }
-        @media (min-width: 768px) {
-            body::before {
-                background-image: url('/images/bg-desktop.webp');
-            }
-        }
-        body::after {
-            content: "";
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(74, 111, 165, 0.7);
-            z-index: -1;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="description" content="Sistem Informasi Jadwal Nikah KUA Belitang Hilir">
+  <meta name="theme-color" content="#4a6fa5">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="SI-JaNi">
+
+  <link rel="preload" href="images/bg-mobile.webp" as="image" media="(max-width: 767px)">
+  <link rel="preload" href="images/bg-desktop.webp" as="image" media="(min-width: 768px)">
+  
+  <link rel="icon" href="favicon.ico" type="image/x-icon">
+  <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192x192.png">
+  <link rel="icon" type="image/png" sizes="512x512" href="icons/icon-512x512.png">
+  <link rel="apple-touch-icon" href="icons/icon-192x192.png">
+  
+  <link rel="manifest" href="manifest.json">
+  
+  <title>SI-JaNi - KUA Belitang Hilir</title>
+  
+  <link rel="stylesheet" href="css/style.css">
+
+  <style>
+    body {
+      background-color: #4a6fa5;
+      margin: 0;
+      padding: 0;
+      min-height: 100vh;
+      font-family: 'Segoe UI', Tahoma, sans-serif;
+    }
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url('images/bg-mobile.webp');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      z-index: -1;
+    }
+    @media (min-width: 768px) {
+      body::before {
+        background-image: url('images/bg-desktop.webp');
+      }
+    }
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(74, 111, 165, 0.7);
+      z-index: -1;
+    }
+  </style>
 </head>
 <body>
-    <div class="login-container">
-        <header>
-            <div class="logo">
-                <img src="/icons/icon-192x192.png" alt="Logo SI-JaNi" width="80">
-            </div>
-            <h1>SI-JaNi</h1>
-            <h2>Sistem Informasi Jadwal Nikah</h2>
-            <h3>KUA Belitang Hilir</h3>
-        </header>
-        
-        <main>
-            <form id="loginForm">
-                <div class="input-group">
-                    <label for="username">Username</label>
-                    <input type="text" id="username" required aria-label="Masukkan username">
-                </div>
-                <div class="input-group">
-                    <label for="password">Password</label>
-                    <input type="password" id="password" required aria-label="Masukkan password">
-                </div>
-                <button type="submit" class="btn-login">Login</button>
-            </form>
-            <div id="loginError" class="error-message" aria-live="assertive"></div>
-        </main>
-    </div>
-    
-    <footer>
-        <p>Dikembangkan oleh Udi Wijaya</p>
-    </footer>
+  <div class="login-container">
+    <header>
+      <div class="logo">
+        <img src="icons/icon-192x192.png" alt="Logo SI-JaNi" width="80">
+      </div>
+      <h1>SI-JaNi</h1>
+      <h2>Sistem Informasi Jadwal Nikah</h2>
+      <h3>KUA Belitang Hilir</h3>
+    </header>
 
-    <!-- JavaScript -->
-    <script src="js/script.js"></script>
-    
-    <!-- Service Worker Registration -->
-    <script>
-        if ('serviceWorker' in navigator) {
-            window.addEventListener('load', () => {
-                navigator.serviceWorker.register('/sw.js')
-                    .then(registration => {
-                        console.log('SW registered: ', registration.scope);
-                    })
-                    .catch(registrationError => {
-                        console.log('SW registration failed: ', registrationError);
-                    });
-            });
-        }
-    </script>
+    <main>
+      <form id="loginForm">
+        <div class="input-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" required aria-label="Masukkan username">
+        </div>
+        <div class="input-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" required aria-label="Masukkan password">
+        </div>
+        <button type="submit" class="btn-login">Login</button>
+      </form>
+      <div id="loginError" class="error-message" aria-live="assertive"></div>
+    </main>
+  </div>
+
+  <footer>
+    <p>Dikembangkan oleh Udi Wijaya</p>
+  </footer>
+
+  <script src="js/script.js"></script>
+  <script>
+    if ('serviceWorker' in navigator) {
+      window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js')
+          .then(registration => {
+            console.log('SW registered: ', registration.scope);
+          })
+          .catch(err => {
+            console.log('SW registration failed: ', err);
+          });
+      });
+    }
+  </script>
 </body>
 </html>
