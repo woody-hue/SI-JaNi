@@ -178,4 +178,20 @@ function editSchedule(id) {
   if (data) openModal(data);
 }
 
-// Hapus function deleteSchedule di sini kalau mau handle delete di API juga (bisa aku bantu tulis)
+async function updateScheduleToAPI(data) {
+  await fetch('/api/schedules', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(data)
+  });
+  loadSchedules();
+}
+
+async function deleteSchedule(id) {
+  await fetch('/api/schedules', {
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ id })
+  });
+  loadSchedules();
+}
