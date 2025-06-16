@@ -1,5 +1,5 @@
 let currentDate = new Date();
-let schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+let schedules = [];
 
 document.addEventListener('DOMContentLoaded', () => {
   if (!localStorage.getItem('isLogin')) {
@@ -17,9 +17,32 @@ document.addEventListener('DOMContentLoaded', () => {
 
   setupControls();
   setupModal();
-  renderCalendar();
-  renderScheduleList();
+  loadSchedules();
 });
+
+async function loadSchedules() {
+  try {
+    const res = await fetch('/api/schedules');
+    schedules = await res.json();
+    renderCalendar();
+    renderScheduleList();
+  } catch (err) {
+    console.error('Gagal load jadwal:', err);
+  }
+}
+
+async function saveScheduleToAPI(data) {
+  try {
+    await fetch('/api/schedules', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    loadSchedules();
+  } catch (err) {
+    console.error('Gagal simpan jadwal:', err);
+  }
+}
 
 function setupControls() {
   document.getElementById('prevMonthBtn').addEventListener('click', () => {
@@ -103,10 +126,6 @@ function setupModal() {
   document.getElementById('location').addEventListener('change', e => {
     document.getElementById('locationDetailGroup').style.display = e.target.value === 'Lapangan' ? 'block' : 'none';
   });
-  document.getElementById('deleteBtn').addEventListener('click', () => {
-    deleteSchedule(document.getElementById('scheduleId').value);
-    closeModal();
-  });
 }
 
 function openModal(data = null) {
@@ -137,9 +156,7 @@ function closeModal() {
 }
 
 function saveSchedule() {
-  const id = document.getElementById('scheduleId').value || Date.now().toString();
   const data = {
-    id,
     groomName: document.getElementById('groomName').value,
     brideName: document.getElementById('brideName').value,
     groomPhone: document.getElementById('groomPhone').value,
@@ -152,16 +169,7 @@ function saveSchedule() {
     notes: document.getElementById('notes').value
   };
 
-  const index = schedules.findIndex(s => s.id === id);
-  if (index > -1) {
-    schedules[index] = data;
-  } else {
-    schedules.push(data);
-  }
-
-  localStorage.setItem('schedules', JSON.stringify(schedules));
-  renderCalendar();
-  renderScheduleList();
+  saveScheduleToAPI(data);
   closeModal();
 }
 
@@ -170,9 +178,4 @@ function editSchedule(id) {
   if (data) openModal(data);
 }
 
-function deleteSchedule(id) {
-  schedules = schedules.filter(s => s.id !== id);
-  localStorage.setItem('schedules', JSON.stringify(schedules));
-  renderCalendar();
-  renderScheduleList();
-}
+// Hapus function deleteSchedule di sini kalau mau handle delete di API juga (bisa aku bantu tulis)
